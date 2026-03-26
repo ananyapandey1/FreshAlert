@@ -7,11 +7,12 @@ import ProductDetails from './ProductDetails';
 import Auth from './Auth';
 import Onboarding from './Onboarding';
 import Settings from './Settings';
+import LandingPage from './LandingPage';
 
 function App() {
   const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('user')) || null);
   const [token, setToken] = useState(() => localStorage.getItem('token') || null);
-  const [currentView, setCurrentView] = useState('splash'); // 'splash' | 'auth' | 'onboarding' | 'dashboard' | 'scanner' | 'confirm' | 'product_details'
+  const [currentView, setCurrentView] = useState('splash'); // 'splash' | 'landing' | 'auth' | 'onboarding' | 'dashboard' | 'scanner' | 'confirm' | 'product_details'
   const [inventory, setInventory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sortOption, setSortOption] = useState('expiry'); // 'expiry' | 'recent'
@@ -93,7 +94,7 @@ function App() {
       setCurrentView('dashboard'); 
     } else if (currentView === 'splash') {
       const splashTimer = setTimeout(() => {
-        setCurrentView(token ? 'dashboard' : 'auth');
+        setCurrentView(token ? 'dashboard' : 'landing');
       }, 2000);
       return () => clearTimeout(splashTimer);
     }
@@ -357,6 +358,10 @@ function App() {
         <h1 className="splash-text">FreshAlert</h1>
       </div>
     );
+  }
+
+  if (currentView === 'landing' && !token) {
+    return <LandingPage onGetStarted={() => setCurrentView('auth')} />;
   }
 
   if (currentView === 'auth') {

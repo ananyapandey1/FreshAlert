@@ -134,9 +134,10 @@ app.get('/api/auth/callback', async (req, res) => {
   
   try {
     const { tokens } = await oauth2Client.getToken(code);
-    const userId = state; 
+    const userId = parseInt(state); 
     
     if (userId) {
+      console.log(`OAuth tokens received for User ${userId}. Updating user record...`);
       await db.query('UPDATE users SET google_tokens = $1 WHERE id = $2', [JSON.stringify(tokens), userId]);
       console.log("OAuth Token Successfully Stored in DB for user:", userId);
     }

@@ -52,7 +52,7 @@ app.post('/api/auth/register', async (req, res) => {
     
     try {
       const resDb = await db.query(
-        'INSERT INTO Users (email, password_hash) VALUES ($1, $2) RETURNING id',
+        'INSERT INTO users (email, password_hash) VALUES ($1, $2) RETURNING id',
         [email, hash]
       );
       const user = { id: resDb.rows[0].id, email };
@@ -72,7 +72,7 @@ app.post('/api/auth/register', async (req, res) => {
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-    const resDb = await db.query('SELECT * FROM Users WHERE email = $1', [email]);
+    const resDb = await db.query('SELECT * FROM users WHERE email = $1', [email]);
     const userRecord = resDb.rows[0];
     
     if (!userRecord) {
@@ -95,7 +95,7 @@ app.post('/api/auth/login', async (req, res) => {
 
 app.get('/api/inventory', authenticate, async (req, res) => {
   try {
-    const resDb = await db.query('SELECT * FROM Inventory WHERE user_id = $1 ORDER BY id DESC', [req.user.id]);
+    const resDb = await db.query('SELECT * FROM inventory WHERE user_id = $1 ORDER BY id DESC', [req.user.id]);
     res.json(resDb.rows);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -106,7 +106,7 @@ app.get('/api/inventory', authenticate, async (req, res) => {
 
 app.get('/api/auth/status', authenticate, async (req, res) => {
   try {
-    const resDb = await db.query('SELECT google_tokens FROM Users WHERE id = $1', [req.user.id]);
+    const resDb = await db.query('SELECT google_tokens FROM users WHERE id = $1', [req.user.id]);
     const user = resDb.rows[0];
     res.json({ authorized: !!(user && user.google_tokens) });
   } catch (error) {
@@ -134,7 +134,7 @@ app.get('/api/auth/callback', async (req, res) => {
     const userId = state; 
     
     if (userId) {
-      await db.query('UPDATE Users SET google_tokens = $1 WHERE id = $2', [JSON.stringify(tokens), userId]);
+      await db.query('UPDATE users SET google_tokens = $1 WHERE id = $2', [JSON.stringify(tokens), userId]);
       console.log("OAuth Token Successfully Stored in DB for user:", userId);
     }
     
@@ -151,7 +151,7 @@ app.post('/api/inventory', authenticate, async (req, res) => {
     const { product_name, expiry_date, product_image, status, calendar_id } = req.body;
     let finalCalendarId = calendar_id || 'unlinked';
 
-    const resUser = await db.query('SELECT google_tokens FROM Users WHERE id = $1', [req.user.id]);
+    const resUser = await db.query('SELECT google_tokens FROM users WHERE id = $1', [req.user.id]);
     const userRecord = resUser.rows[0];
     const userTokens = userRecord && userRecord.google_tokens ? JSON.parse(userRecord.google_tokens) : null;
 
@@ -200,7 +200,7 @@ app.post('/api/inventory', authenticate, async (req, res) => {
     }
 
     await db.query(`
-      INSERT INTO Inventory (product_name, expiry_date, product_image, status, calendar_id, added_on, user_id)
+      INSERT INTO inventory (product_name, expiry_date, product_image, status, calendar_id, added_on, user_id)
       VALUES ($1, $2, $3, $4, $5, CURRENT_DATE, $6)
     `, [product_name, expiry_date, product_image, status, finalCalendarId, req.user.id]);
     
@@ -219,7 +219,7 @@ app.put('/api/inventory/:id', authenticate, async (req, res) => {
     const { product_name, expiry_date, added_on, status } = req.body;
     
     const resDb = await db.query(`
-      UPDATE Inventory 
+      UPDATE inventory 
       SET product_name = $1, expiry_date = $2, added_on = $3, status = $4
       WHERE id = $5 AND user_id = $6
     `, [product_name, expiry_date, added_on, status, id, req.user.id]);
@@ -235,7 +235,7 @@ app.put('/api/inventory/:id', authenticate, async (req, res) => {
 app.delete('/api/inventory/:id', authenticate, async (req, res) => {
   try {
     const { id } = req.params;
-    const resDb = await db.query('DELETE FROM Inventory WHERE id = $1 AND user_id = $2', [id, req.user.id]);
+    const resDb = await db.query('DELETE FROM inventory WHERE id = $1 AND user_id = $2', [id, req.user.id]);
     if (resDb.rowCount === 0) return res.status(404).json({ error: "Item not found" });
     
     res.json({ message: "Deleted successfully" });

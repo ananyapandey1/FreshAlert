@@ -15,9 +15,10 @@ const pool = new Pool({
 const initializeDatabase = async () => {
   try {
     const client = await pool.connect();
+    console.log('Connected to PostgreSQL, checking/creating tables...');
     
     await client.query(`
-      CREATE TABLE IF NOT EXISTS Users (
+      CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         email TEXT UNIQUE NOT NULL,
         password_hash TEXT NOT NULL,
@@ -26,7 +27,7 @@ const initializeDatabase = async () => {
     `);
 
     await client.query(`
-      CREATE TABLE IF NOT EXISTS Inventory (
+      CREATE TABLE IF NOT EXISTS inventory (
         id SERIAL PRIMARY KEY,
         product_name TEXT,
         expiry_date DATE,
@@ -38,13 +39,10 @@ const initializeDatabase = async () => {
       )
     `);
 
-    // Check if user_id column exists is slightly different in Postgres but IF NOT EXISTS on table creation handled it.
-    // In a fresh Postgres DB, we don't need the ALTER TABLE dance.
-
-    const res = await client.query('SELECT COUNT(*) as count FROM Inventory');
+    const res = await client.query('SELECT COUNT(*) as count FROM inventory');
     if (parseInt(res.rows[0].count) === 0) {
       await client.query(`
-        INSERT INTO Inventory (product_name, expiry_date, product_image, status, calendar_id, added_on)
+        INSERT INTO inventory (product_name, expiry_date, product_image, status, calendar_id, added_on)
         VALUES 
         ('Organic Milk', '2026-03-20', 'https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&q=80&w=200', 'Fresh', 'cal-1', CURRENT_DATE),
         ('Sourdough Bread', '2026-03-15', 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&q=80&w=200', 'Fresh', 'cal-2', CURRENT_DATE)
@@ -52,7 +50,7 @@ const initializeDatabase = async () => {
     }
 
     client.release();
-    console.log('PostgreSQL Database initialized');
+    console.log('PostgreSQL Database initialized successfully');
   } catch (err) {
     console.error('Database initialization error:', err);
   }

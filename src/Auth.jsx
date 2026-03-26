@@ -59,7 +59,7 @@ function Auth({ onAuthSuccess }) {
               value={email} 
               onChange={(e) => setEmail(e.target.value)} 
               required 
-              placeholder="chef@kitchen.com"
+              placeholder="enter your email address"
               name="email"
               autoComplete="email"
             />
@@ -73,7 +73,7 @@ function Auth({ onAuthSuccess }) {
                 value={password} 
                 onChange={(e) => setPassword(e.target.value)} 
                 required 
-                placeholder="••••••••"
+                placeholder=""
                 autoComplete={isLogin ? "current-password" : "new-password"}
               />
               <button 

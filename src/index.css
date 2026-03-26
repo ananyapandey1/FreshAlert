@@ -1,0 +1,51 @@
+:root {
+  --color-mint-green: #e2f2e6; /* Soft pastel green background/header */
+  --color-mint-dark: #b8dfc4;
+  --color-cream: #fffdf5; /* Background */
+  --color-cream-dark: #f0ead2;
+  --color-amber: #fdecd1; /* Scan button soft amber */
+  --color-amber-dark: #f7d6a5;
+  --color-text-main: #4a5d52;
+  --color-text-muted: #8b9991;
+  --color-white: #ffffff;
+  --color-primary-yellow: #FFD700;
+  --color-primary-yellow-hover: #E5C100;
+  
+  --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.04);
+  --shadow-hover: 0 12px 32px rgba(0, 0, 0, 0.08);
+  --shadow-btn: 0 10px 20px rgba(247, 214, 165, 0.4);
+  --shadow-yellow: 0 10px 20px rgba(255, 215, 0, 0.4);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+body {
+  background-color: var(--color-cream);
+  color: var(--color-text-main);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+}
+
+#root {
+  width: 100%;
+  max-width: 480px; /* Mobile app simulation */
+  background-color: var(--color-cream);
+  position: relative;
+  box-shadow: 0 0 40px rgba(0,0,0,0.05);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+h1, h2, h3, h4 {
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}

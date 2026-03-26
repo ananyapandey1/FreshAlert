@@ -44,7 +44,7 @@ function Auth({ onAuthSuccess }) {
           </h2>
           {isLogin && (
             <p style={{ color: 'var(--color-text-muted)', fontSize: 14, marginTop: 8 }}>
-              Looks like you are still not part of the fam
+              Happy to see you again
             </p>
           )}
         </div>

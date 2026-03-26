@@ -150,6 +150,17 @@ app.get('/api/auth/callback', async (req, res) => {
   }
 });
 
+app.post('/api/auth/google/unlink', authenticate, async (req, res) => {
+  try {
+    const userId = parseInt(req.user.id);
+    await db.query('UPDATE users SET google_tokens = NULL WHERE id = $1', [userId]);
+    console.log(`Google Calendar unlinked for User ${userId}`);
+    res.json({ message: "Unlinked successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.post('/api/inventory', authenticate, async (req, res) => {
   try {
     const { product_name, expiry_date, product_image, status, calendar_id } = req.body;

@@ -4,6 +4,24 @@ const Settings = ({ user, isCalendarAuthorized, onBack, onLogout }) => {
   const [dailyAlert, setDailyAlert] = useState(true);
   const [leadTime, setLeadTime] = useState('3 Days');
 
+  const handleUnlink = async () => {
+    if (!window.confirm("Unlink Google Calendar? New products will not sync to your calendar.")) return;
+    try {
+      const response = await fetch('/api/auth/google/unlink', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      if (response.ok) {
+        window.location.reload(); 
+      }
+    } catch (error) {
+       console.error(error);
+       alert("Failed to unlink.");
+    }
+  };
+
   return (
     <div className="settings-container pastel-theme">
       <div className="details-header">
@@ -45,9 +63,10 @@ const Settings = ({ user, isCalendarAuthorized, onBack, onLogout }) => {
               value={leadTime} 
               onChange={(e) => setLeadTime(e.target.value)}
             >
-              <option>1 Day</option>
+               <option>1 Day</option>
               <option>3 Days</option>
               <option>7 Days</option>
+              <option>15 Days</option>
             </select>
           </div>
         </div>
@@ -60,7 +79,16 @@ const Settings = ({ user, isCalendarAuthorized, onBack, onLogout }) => {
               <strong>Status: Google Calendar {isCalendarAuthorized ? 'Connected' : 'Not Connected'}</strong>
             </div>
             {isCalendarAuthorized ? (
-              <button className="settings-btn-disabled" disabled>✓ Synced</button>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button className="settings-btn-disabled" style={{ backgroundColor: '#F0F0F0', color: '#888' }} disabled>✓ Connected</button>
+                <button 
+                  className="settings-btn-secondary" 
+                  style={{ padding: '8px 12px', fontSize: '12px', minWidth: 'auto', backgroundColor: '#FFF0F0', color: '#FF4444', borderColor: '#FF4444' }}
+                  onClick={handleUnlink}
+                >
+                  Unlink
+                </button>
+              </div>
             ) : (
               <button 
                 className="settings-btn-primary"

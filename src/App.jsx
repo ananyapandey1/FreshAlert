@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Trash2 } from 'lucide-react';
 import './App.css';
 import Scanner from './Scanner';
 import ConfirmDetails from './ConfirmDetails';
@@ -411,9 +412,19 @@ function App() {
     })
     .sort((a, b) => {
     if (sortOption === 'expiry') {
-      const daysA = getDaysUntilExpiry(a.expiry_date);
-      const daysB = getDaysUntilExpiry(b.expiry_date);
-      return daysA - daysB; // Ascending (Closest to expire first)
+      const getPriority = (item) => {
+        const days = getDaysUntilExpiry(item.expiry_date);
+        if (days >= 0 && days <= 7) return 1; // Expiring Soon
+        if (days > 7) return 2;              // Fresh
+        return 3;                            // Expired
+      };
+      
+      const priorityA = getPriority(a);
+      const priorityB = getPriority(b);
+      
+      if (priorityA !== priorityB) return priorityA - priorityB;
+      
+      return getDaysUntilExpiry(a.expiry_date) - getDaysUntilExpiry(b.expiry_date);
     } else {
       const dateA = new Date(a.added_on || 0);
       const dateB = new Date(b.added_on || 0);
@@ -541,6 +552,17 @@ function App() {
                 <div className={`item-status ${badgeClass}`}>
                   {badgeText}
                 </div>
+
+                <button 
+                  className="delete-card-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteProduct(item.id);
+                  }}
+                  title="Delete Product"
+                >
+                  <Trash2 size={18} />
+                </button>
               </div>
             );
           })

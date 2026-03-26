@@ -1,6 +1,6 @@
 import React from 'react';
 
-function Onboarding({ onSkip }) {
+function Onboarding({ userId, onSkip }) {
   return (
     <div className="onboarding-container">
       <div className="onboarding-card">

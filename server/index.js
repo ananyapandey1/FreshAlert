@@ -95,7 +95,10 @@ app.post('/api/auth/login', async (req, res) => {
 
 app.get('/api/inventory', authenticate, async (req, res) => {
   try {
-    const resDb = await db.query('SELECT * FROM inventory WHERE user_id = $1 ORDER BY id DESC', [req.user.id]);
+    const userId = parseInt(req.user.id);
+    console.log(`Fetching inventory for User ID: ${userId}`);
+    const resDb = await db.query('SELECT * FROM inventory WHERE user_id = $1 ORDER BY id DESC', [userId]);
+    console.log(`Found ${resDb.rows.length} items for User ${userId}`);
     res.json(resDb.rows);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -200,10 +203,12 @@ app.post('/api/inventory', authenticate, async (req, res) => {
       }
     }
 
+    const userId = parseInt(req.user.id);
     await db.query(`
       INSERT INTO inventory (product_name, expiry_date, product_image, status, calendar_id, added_on, user_id)
       VALUES ($1, $2, $3, $4, $5, CURRENT_DATE, $6)
-    `, [product_name, expiry_date, product_image, status, finalCalendarId, req.user.id]);
+    `, [product_name, expiry_date, product_image, status, finalCalendarId, userId]);
+    console.log(`Successfully saved item to DB for User ${userId}`);
     
     res.status(201).json({ 
       message: "Success",

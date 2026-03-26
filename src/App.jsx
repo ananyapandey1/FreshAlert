@@ -31,16 +31,14 @@ function App() {
   const [pendingSaveData, setPendingSaveData] = useState(null);
 
   const fetchInventory = () => {
-    if (!token) return;
+    if (!token) return Promise.resolve();
     setLoading(true);
-    fetch(`/api/inventory`, {
+    return fetch(`/api/inventory`, {
       headers: { 'Authorization': `Bearer ${token}` }
     })
       .then(res => {
         if (!res.ok) {
-           if (res.status === 401 || res.status === 403) {
-             handleLogout();
-           }
+           if (res.status === 401 || res.status === 403) handleLogout();
            throw new Error('Failed to fetch');
         }
         return res.json();

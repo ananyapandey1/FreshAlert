@@ -22,6 +22,36 @@ const Settings = ({ user, isCalendarAuthorized, onBack, onLogout }) => {
     }
   };
 
+  const handleDeleteAccount = async () => {
+    if (!window.confirm("WARNING: Are you sure you want to delete your account? This will permanently wipe all your ingredients and calendar sync settings.")) {
+      return;
+    }
+    
+    if (!window.confirm("LAST CHANCE: This cannot be undone. Delete forever?")) {
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/auth/account', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (response.ok) {
+        alert("Account deleted successfully.");
+        onLogout(); // This clears local storage and takes them to login
+      } else {
+        const data = await response.json();
+        alert(data.error || "Failed to delete account.");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("An error occurred during account deletion.");
+    }
+  };
+
   return (
     <div className="settings-container pastel-theme">
       <div className="details-header">
@@ -112,7 +142,7 @@ const Settings = ({ user, isCalendarAuthorized, onBack, onLogout }) => {
           
           <div className="settings-actions">
             <button className="settings-btn-secondary" onClick={onLogout}>Logout</button>
-            <button className="settings-btn-danger">Delete Account</button>
+            <button className="settings-btn-danger" onClick={handleDeleteAccount}>Delete Account</button>
           </div>
         </div>
 

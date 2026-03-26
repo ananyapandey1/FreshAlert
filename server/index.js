@@ -161,6 +161,25 @@ app.post('/api/auth/google/unlink', authenticate, async (req, res) => {
   }
 });
 
+app.delete('/api/auth/account', authenticate, async (req, res) => {
+  try {
+    const userId = parseInt(req.user.id);
+    console.log(`Starting account deletion for User ${userId}`);
+    
+    // 1. Delete user inventory
+    await db.query('DELETE FROM inventory WHERE user_id = $1', [userId]);
+    
+    // 2. Delete the user record
+    await db.query('DELETE FROM users WHERE id = $1', [userId]);
+    
+    console.log(`Account successfully deleted for User ${userId}`);
+    res.json({ message: "Account deleted successfully" });
+  } catch (error) {
+    console.error("Account Deletion Error:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.post('/api/inventory', authenticate, async (req, res) => {
   try {
     const { product_name, expiry_date, product_image, status, calendar_id } = req.body;

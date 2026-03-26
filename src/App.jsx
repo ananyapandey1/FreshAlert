@@ -77,9 +77,21 @@ function App() {
       setToastMessage('Calendar Connected!');
       setTimeout(() => setToastMessage(''), 3000);
       
+      // Check for pending save data from before the redirect
+      const pendingData = localStorage.getItem('pendingSaveData');
+      const capturedImg = localStorage.getItem('capturedImage');
+      if (pendingData && capturedImg) {
+        console.log("Restoring pending save after OAuth redirect");
+        const parsedData = JSON.parse(pendingData);
+        setCapturedImage(capturedImg);
+        executeSave(parsedData, capturedImg); 
+        localStorage.removeItem('pendingSaveData');
+        localStorage.removeItem('capturedImage');
+      }
+
       // Clean up URL
       window.history.replaceState({}, document.title, window.location.pathname);
-      setCurrentView('dashboard'); // Skip splash if returning from auth
+      setCurrentView('dashboard'); 
     } else if (currentView === 'splash') {
       const splashTimer = setTimeout(() => {
         setCurrentView(token ? 'dashboard' : 'auth');
@@ -88,10 +100,14 @@ function App() {
     }
 
     // Check backend status silently on load
-    fetch(`/api/auth/status`)
-      .then(r => r.json())
-      .then(d => setIsCalendarAuthorized(d.authorized))
-      .catch(e => console.log('Auth check failed', e));
+    if (token) {
+      fetch(`/api/auth/status`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+        .then(r => r.json())
+        .then(d => setIsCalendarAuthorized(d.authorized))
+        .catch(e => console.log('Auth check failed', e));
+    }
 
   }, [token, currentView]);
 
@@ -143,17 +159,19 @@ function App() {
     // If not authorized and haven't shown modal yet, intercept the save
     if (!isCalendarAuthorized) {
        setPendingSaveData(finalData);
+       localStorage.setItem('pendingSaveData', JSON.stringify(finalData));
+       localStorage.setItem('capturedImage', capturedImage);
        setShowCalendarModal(true);
        return;
     }
     
     // Otherwise, proceed to save directly
-    executeSave(finalData);
+    executeSave(finalData, capturedImage);
   };
 
-  const executeSave = async (dataToSave) => {
+  const executeSave = async (dataToSave, imgToUse) => {
     setIsSaving(true);
-    
+    const activeImage = imgToUse || capturedImage;
     // Calculate status
     let computedStatus = 'Fresh';
     if (dataToSave.expiry) {
@@ -177,7 +195,7 @@ function App() {
         body: JSON.stringify({
           product_name: dataToSave.name,
           expiry_date: dataToSave.expiry,
-          product_image: capturedImage, 
+          product_image: activeImage, 
           status: computedStatus,
           calendar_id: 'cal-temp'
         })

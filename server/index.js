@@ -151,12 +151,13 @@ app.post('/api/inventory', authenticate, async (req, res) => {
     const { product_name, expiry_date, product_image, status, calendar_id } = req.body;
     let finalCalendarId = calendar_id || 'unlinked';
 
+    console.log(`User ${req.user.id} is adding product: ${product_name}`);
     const resUser = await db.query('SELECT google_tokens FROM users WHERE id = $1', [req.user.id]);
     const userRecord = resUser.rows[0];
     const userTokens = userRecord && userRecord.google_tokens ? JSON.parse(userRecord.google_tokens) : null;
 
     if (userTokens && expiry_date) {
-      console.log("Attempting Calendar insertion for:", product_name, "on", expiry_date);
+      console.log(`Calendar tokens found for user ${req.user.id}. Attempting sync.`);
       oauth2Client.setCredentials(userTokens);
       const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
       

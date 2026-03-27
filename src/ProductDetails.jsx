@@ -11,7 +11,8 @@ const ProductDetails = ({ item, onBack, onSave, onDelete, leadTime = 7 }) => {
 
   useEffect(() => {
     if (item) {
-      console.log("Opening ProductDetails for:", item.product_name, "with dates:", { added: item.added_on, expiry: item.expiry_date });
+      console.log("ProductDetails received item:", item);
+      console.log("Dates from item - Added:", item.added_on, "Expiry:", item.expiry_date);
       
       let reminderStr = '';
       if (item.expiry_date) {

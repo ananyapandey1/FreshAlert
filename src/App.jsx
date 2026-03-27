@@ -31,6 +31,7 @@ function App() {
   
   // Track the most recent save payload in case we go out to OAuth and come back
   const [pendingSaveData, setPendingSaveData] = useState(null);
+  const [selectedItem, setSelectedItem] = useState(null);
 
   const fetchInventory = () => {
     if (!token) return Promise.resolve();
@@ -98,6 +99,10 @@ function App() {
     setUser(null);
     setCurrentView('auth');
   };
+
+  useEffect(() => {
+    console.log("VIEW CHANGE:", currentView, "Selected Item:", selectedItem?.product_name);
+  }, [currentView, selectedItem]);
 
   useEffect(() => {
     if (token) {

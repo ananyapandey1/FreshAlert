@@ -16,12 +16,13 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [sortOption, setSortOption] = useState('expiry'); // 'expiry' | 'recent'
   const [activeFilter, setActiveFilter] = useState('ALL'); // 'ALL' | 'EXPIRED' | 'EXPIRING' | 'FRESH'
-  const [selectedItem, setSelectedItem] = useState(null);
-  
-  // Data flowing from Scanner -> ConfirmDetails
   const [capturedImage, setCapturedImage] = useState(null);
   const [extractedData, setExtractedData] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [leadTime, setLeadTime] = useState(() => localStorage.getItem('leadTime') || '7 Days');
+
+  // Helper to get numeric lead time
+  const getLeadDays = () => parseInt(leadTime.split(' ')[0]) || 7;
 
   // Calendar Auth & UI States
   const [isCalendarAuthorized, setIsCalendarAuthorized] = useState(false);
@@ -45,7 +46,43 @@ function App() {
         return res.json();
       })
       .then(data => {
-        setInventory(data);
+        const formattedData = data.map(item => {
+          const toYYYYMMDD = (d) => {
+            if (!d) return '';
+            try {
+              // Handle multiple string formats (DD/MM/YYYY or DD-MM-YYYY)
+              if (typeof d === 'string') {
+                const parts = d.split(/[\/\-]/);
+                if (parts.length === 3) {
+                  // Check if it's DD/MM/YYYY
+                  if (parts[0].length <= 2 && parts[2].length === 4) {
+                    return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+                  }
+                  // Check if it's YYYY/MM/DD
+                  if (parts[0].length === 4) {
+                    return `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+                  }
+                }
+              }
+              const date = new Date(d);
+              if (isNaN(date.getTime())) return '';
+              const year = date.getFullYear();
+              const month = String(date.getMonth() + 1).padStart(2, '0');
+              const day = String(date.getDate()).padStart(2, '0');
+              return `${year}-${month}-${day}`;
+            } catch (err) { 
+              console.error("Critical Date Error:", d, err);
+              return ''; 
+            }
+          };
+          return {
+            ...item,
+            added_on: toYYYYMMDD(item.added_on),
+            expiry_date: toYYYYMMDD(item.expiry_date)
+          };
+        });
+        console.log("FINAL INVENTORY:", formattedData);
+        setInventory(formattedData);
         setLoading(false);
       })
       .catch(err => {
@@ -114,6 +151,11 @@ function App() {
     if (!dateString) return 'Unknown';
     const options = { month: 'short', day: 'numeric', year: 'numeric' };
     try {
+      // If it's a YYYY-MM-DD string, parse as local to avoid UTC shift
+      if (typeof dateString === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+        const [year, month, day] = dateString.split('-').map(Number);
+        return new Date(year, month - 1, day).toLocaleDateString(undefined, options);
+      }
       return new Date(dateString).toLocaleDateString(undefined, options);
     } catch {
       return dateString;
@@ -181,7 +223,7 @@ function App() {
       const daysLeft = Math.ceil((expiryDate - today) / (1000 * 60 * 60 * 24));
       
       if (daysLeft < 0) computedStatus = 'Expired';
-      else if (daysLeft <= 7) computedStatus = 'Expiring Soon';
+      else if (daysLeft <= getLeadDays()) computedStatus = 'Expiring Soon';
     }
 
     try {
@@ -232,7 +274,7 @@ function App() {
       const daysLeft = Math.ceil((expiryDate - today) / (1000 * 60 * 60 * 24));
       
       if (daysLeft < 0) computedStatus = 'Expired';
-      else if (daysLeft <= 7) computedStatus = 'Expiring Soon';
+      else if (daysLeft <= getLeadDays()) computedStatus = 'Expiring Soon';
     }
 
     try {
@@ -345,6 +387,7 @@ function App() {
           onBack={() => setCurrentView('dashboard')}
           onSave={handleUpdateProduct}
           onDelete={handleDeleteProduct}
+          leadTime={getLeadDays()}
         />
       </div>
     );
@@ -378,7 +421,14 @@ function App() {
   }
 
   if (currentView === 'settings') {
-    return <Settings user={user} isCalendarAuthorized={isCalendarAuthorized} onBack={() => setCurrentView('dashboard')} onLogout={handleLogout} />;
+    return <Settings 
+      user={user} 
+      isCalendarAuthorized={isCalendarAuthorized} 
+      onBack={() => setCurrentView('dashboard')} 
+      onLogout={handleLogout}
+      leadTime={leadTime}
+      setLeadTime={setLeadTime}
+    />;
   }
 
   // Calculate days until expiry
@@ -397,26 +447,26 @@ function App() {
   const expiredCount = inventory.filter(item => getDaysUntilExpiry(item.expiry_date) < 0).length;
   const expiringSoonCount = inventory.filter(item => {
     const days = getDaysUntilExpiry(item.expiry_date);
-    return days >= 0 && days <= 7;
+    return days >= 0 && days <= getLeadDays();
   }).length;
-  const freshCount = inventory.filter(item => getDaysUntilExpiry(item.expiry_date) > 7).length;
+  const freshCount = inventory.filter(item => getDaysUntilExpiry(item.expiry_date) > getLeadDays()).length;
 
   // Sorting Logic
   const sortedInventory = [...inventory]
     .filter(item => {
        const days = getDaysUntilExpiry(item.expiry_date);
        if (activeFilter === 'EXPIRED') return days < 0;
-       if (activeFilter === 'EXPIRING') return days >= 0 && days <= 7;
-       if (activeFilter === 'FRESH') return days > 7;
+       if (activeFilter === 'EXPIRING') return days >= 0 && days <= getLeadDays();
+       if (activeFilter === 'FRESH') return days > getLeadDays();
        return true; // 'ALL'
     })
     .sort((a, b) => {
     if (sortOption === 'expiry') {
       const getPriority = (item) => {
         const days = getDaysUntilExpiry(item.expiry_date);
-        if (days >= 0 && days <= 7) return 1; // Expiring Soon
-        if (days > 7) return 2;              // Fresh
-        return 3;                            // Expired
+        if (days >= 0 && days <= getLeadDays()) return 1; // Expiring Soon
+        if (days > getLeadDays()) return 2;              // Fresh
+        return 3;                                        // Expired
       };
       
       const priorityA = getPriority(a);
@@ -517,7 +567,7 @@ function App() {
             if (daysLeft < 0) {
               badgeClass = 'status-expired';
               badgeText = 'Expired';
-            } else if (daysLeft <= 7) {
+            } else if (daysLeft <= getLeadDays()) {
               badgeClass = 'status-expiring';
               badgeText = 'Expiring Soon';
             }
@@ -541,10 +591,10 @@ function App() {
                   <h3 className="item-name" style={{ fontWeight: 'bold', fontSize: '18px' }}>
                     {item.product_name}
                   </h3>
-                  <p className="item-expiry" style={{ fontWeight: 600, color: '#212121', marginTop: '4px' }}>
+                  <p className="item-expiry" style={{ fontWeight: 700, color: '#1a1a1a', marginTop: '6px', fontSize: '14px' }}>
                     Expires on: {formatDate(item.expiry_date)}
                   </p>
-                  <p className="item-added-on" style={{ fontSize: '12px', color: '#9E9E9E', margin: '4px 0 0 0' }}>
+                  <p className="item-added-on" style={{ fontSize: '12px', color: '#666666', fontWeight: 500, margin: '4px 0 0 0' }}>
                     Added on: {formatDate(item.added_on)}
                   </p>
                 </div>

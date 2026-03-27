@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const ProductDetails = ({ item, onBack, onSave, onDelete }) => {
+const ProductDetails = ({ item, onBack, onSave, onDelete, leadTime = 7 }) => {
   const [formData, setFormData] = useState({
     product_name: '',
     added_on: '',
@@ -10,12 +10,30 @@ const ProductDetails = ({ item, onBack, onSave, onDelete }) => {
 
   useEffect(() => {
     if (item) {
-      // Calculate a default reminder date (7 days prior) if possible
+      console.log("Opening ProductDetails for:", item.product_name, "with dates:", { added: item.added_on, expiry: item.expiry_date });
+      
       let reminderStr = '';
       if (item.expiry_date) {
-        const expiry = new Date(item.expiry_date);
-        expiry.setDate(expiry.getDate() - 7);
-        reminderStr = expiry.toISOString().split('T')[0];
+        try {
+          const parts = item.expiry_date.split(/[\/\-]/).map(Number);
+          let expiry;
+          if (parts.length === 3 && parts[0] > 1000) {
+             // YYYY-MM-DD
+             expiry = new Date(parts[0], parts[1] - 1, parts[2]);
+          } else {
+             expiry = new Date(item.expiry_date);
+          }
+          
+          if (!isNaN(expiry.getTime())) {
+            expiry.setDate(expiry.getDate() - parseInt(leadTime));
+            const ry = expiry.getFullYear();
+            const rm = String(expiry.getMonth() + 1).padStart(2, '0');
+            const rd = String(expiry.getDate()).padStart(2, '0');
+            reminderStr = `${ry}-${rm}-${rd}`;
+          }
+        } catch (err) {
+          console.warn("Reminder calculation failed:", err);
+        }
       }
       
       setFormData({
@@ -25,7 +43,7 @@ const ProductDetails = ({ item, onBack, onSave, onDelete }) => {
         reminder_date: reminderStr
       });
     }
-  }, [item]);
+  }, [item, leadTime]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

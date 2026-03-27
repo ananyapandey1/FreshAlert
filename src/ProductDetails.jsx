@@ -12,27 +12,33 @@ const ProductDetails = ({ item, onBack, onSave, onDelete, leadTime = 7 }) => {
   useEffect(() => {
     if (item) {
       console.log("ProductDetails received item:", item);
-      console.log("Dates from item - Added:", item.added_on, "Expiry:", item.expiry_date);
+      
+      const toYYYYMMDD = (d) => {
+        if (!d) return '';
+        try {
+          const datePart = typeof d === 'string' ? d.split('T')[0] : d;
+          const date = new Date(datePart);
+          if (isNaN(date.getTime())) return '';
+          const y = date.getFullYear();
+          const m = String(date.getMonth() + 1).padStart(2, '0');
+          const d2 = String(date.getDate()).padStart(2, '0');
+          return `${y}-${m}-${d2}`;
+        } catch { return ''; }
+      };
+
+      const addedStr = toYYYYMMDD(item.added_on);
+      const expiryStr = toYYYYMMDD(item.expiry_date);
       
       let reminderStr = '';
-      if (item.expiry_date) {
+      if (expiryStr) {
         try {
-          const parts = item.expiry_date.split(/[\/\-]/).map(Number);
-          let expiry;
-          if (parts.length === 3 && parts[0] > 1000) {
-             // YYYY-MM-DD
-             expiry = new Date(parts[0], parts[1] - 1, parts[2]);
-          } else {
-             expiry = new Date(item.expiry_date);
-          }
-          
-          if (!isNaN(expiry.getTime())) {
-            expiry.setDate(expiry.getDate() - parseInt(leadTime));
-            const ry = expiry.getFullYear();
-            const rm = String(expiry.getMonth() + 1).padStart(2, '0');
-            const rd = String(expiry.getDate()).padStart(2, '0');
-            reminderStr = `${ry}-${rm}-${rd}`;
-          }
+          const [y, m, d] = expiryStr.split('-').map(Number);
+          const expiry = new Date(y, m - 1, d);
+          expiry.setDate(expiry.getDate() - parseInt(leadTime));
+          const ry = expiry.getFullYear();
+          const rm = String(expiry.getMonth() + 1).padStart(2, '0');
+          const rd = String(expiry.getDate()).padStart(2, '0');
+          reminderStr = `${ry}-${rm}-${rd}`;
         } catch (err) {
           console.warn("Reminder calculation failed:", err);
         }
@@ -40,8 +46,8 @@ const ProductDetails = ({ item, onBack, onSave, onDelete, leadTime = 7 }) => {
       
       setFormData({
         product_name: item.product_name || '',
-        added_on: item.added_on || '',
-        expiry_date: item.expiry_date || '',
+        added_on: addedStr,
+        expiry_date: expiryStr,
         reminder_date: reminderStr
       });
     }

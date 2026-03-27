@@ -51,9 +51,10 @@ function App() {
           const toYYYYMMDD = (d) => {
             if (!d) return '';
             try {
-              // Handle multiple string formats (DD/MM/YYYY or DD-MM-YYYY)
+              // Handle ISO strings or strings with time suffixes
               if (typeof d === 'string') {
-                const parts = d.split(/[\/\-]/);
+                const datePart = d.split('T')[0];
+                const parts = datePart.split(/[\/\-]/);
                 if (parts.length === 3) {
                   // Check if it's DD/MM/YYYY
                   if (parts[0].length <= 2 && parts[2].length === 4) {
@@ -61,7 +62,7 @@ function App() {
                   }
                   // Check if it's YYYY/MM/DD
                   if (parts[0].length === 4) {
-                    return `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+                    return `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].substring(0, 2).padStart(2, '0')}`;
                   }
                 }
               }

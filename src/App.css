@@ -242,7 +242,6 @@
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  min-height: 100px;
 }
 
 .item-card:hover {
@@ -1161,4 +1160,75 @@ input:checked + .toggle-slider:before {
   font-weight: 700;
   font-size: 13px;
   cursor: not-allowed;
+}
+
+/* --- Mobile Optimizations --- */
+@media (max-width: 480px) {
+  .item-card {
+    padding: 16px;
+    gap: 12px;
+    align-items: flex-start;
+    min-height: 90px;
+  }
+  
+  .item-image, .item-image-emoji {
+    width: 50px;
+    height: 50px;
+    min-width: 50px;
+    border-radius: 12px;
+    font-size: 24px;
+  }
+  
+  .item-details {
+    padding-right: 60px;
+    gap: 3px;
+  }
+  
+  .item-name {
+    font-size: 15px;
+    margin-bottom: 2px;
+  }
+  
+  .item-expiry, .item-added-on {
+    font-size: 11px;
+  }
+  
+  .item-status {
+    top: 12px;
+    right: 12px;
+    padding: 2px 8px;
+    font-size: 9px;
+  }
+  
+  .delete-card-btn {
+    width: 32px;
+    height: 32px;
+    bottom: 10px;
+    right: 10px;
+  }
+  
+  .header {
+    padding: 16px 15px;
+  }
+  
+  .header-logo-image {
+    height: 32px;
+  }
+  
+  .kpi-row {
+    margin: 0 15px;
+    gap: 8px;
+  }
+  
+  .kpi-card strong {
+    font-size: 18px;
+  }
+  
+  .kpi-card span {
+    font-size: 9px;
+  }
+  
+  .inventory-list {
+    padding: 12px 15px 120px 15px;
+  }
 }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 const ProductDetails = ({ item, onBack, onSave, onDelete, leadTime = 7 }) => {
+  console.log("ProductDetails Component Initialized with item:", item?.product_name);
   const [formData, setFormData] = useState({
     product_name: '',
     added_on: '',

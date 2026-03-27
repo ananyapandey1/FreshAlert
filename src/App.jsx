@@ -109,15 +109,14 @@ function App() {
     // Check if we just returned from Google Auth
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('auth') === 'success') {
+      console.log("Auth success detected in URL, currentView is:", currentView);
       setIsCalendarAuthorized(true);
       setToastMessage('Calendar Connected!');
       setTimeout(() => setToastMessage(''), 3000);
       
-      // Check for pending save data from before the redirect
       const pendingData = localStorage.getItem('pendingSaveData');
       const capturedImg = localStorage.getItem('capturedImage');
       if (pendingData && capturedImg) {
-        console.log("Restoring pending save after OAuth redirect");
         const parsedData = JSON.parse(pendingData);
         setCapturedImage(capturedImg);
         executeSave(parsedData, capturedImg); 
@@ -125,9 +124,11 @@ function App() {
         localStorage.removeItem('capturedImage');
       }
 
-      // Clean up URL
+      // Clean up URL and only redirect if we aren't already in a specific view
       window.history.replaceState({}, document.title, window.location.pathname);
-      setCurrentView('dashboard'); 
+      if (currentView === 'splash' || currentView === 'auth') {
+        setCurrentView('dashboard'); 
+      }
     } else if (currentView === 'splash') {
       const splashTimer = setTimeout(() => {
         setCurrentView(token ? 'dashboard' : 'auth');
@@ -380,6 +381,7 @@ function App() {
   }
 
   if (currentView === 'product_details') {
+    console.log("RENDERING ProductDetails with item:", selectedItem);
     return (
       <div className="app-container">
         <ProductDetails 
@@ -577,6 +579,7 @@ function App() {
                 className="item-card" 
                 key={item.id}
                 onClick={() => {
+                  console.log("Card clicked for item:", item.product_name);
                   setSelectedItem(item);
                   setCurrentView('product_details');
                 }}

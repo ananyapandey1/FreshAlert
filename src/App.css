@@ -233,16 +233,16 @@
 .item-card {
   background-color: var(--color-white);
   border-radius: 20px;
-  padding: 24px 16px;
+  padding: 20px;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 16px;
   box-shadow: var(--shadow-soft);
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  min-height: 124px;
+  min-height: 100px;
 }
 
 .item-card:hover {
@@ -267,8 +267,9 @@
 .item-image-emoji {
   width: 60px;
   height: 60px;
-  border-radius: 14px;
-  background-color: var(--color-mint-green);
+  min-width: 60px;
+  border-radius: 16px;
+  background-color: #f0f7f2; /* Ultra light green/cream */
   display: flex;
   justify-content: center;
   align-items: center;

@@ -327,7 +327,111 @@ function App() {
     }
   };
 
-  // View Logic handled in main return below
+  if (currentView === 'scanner') {
+    return (
+      <div className="app-container">
+        <Scanner 
+          onCapture={handleCapture}
+          onClose={() => setCurrentView('dashboard')}
+        />
+      </div>
+    );
+  }
+
+  if (currentView === 'confirm') {
+    return (
+      <div className="app-container">
+        <ConfirmDetails 
+          image={capturedImage}
+          extractedData={extractedData}
+          onConfirm={handleConfirmSave}
+          onCancel={() => setCurrentView('dashboard')}
+          isSaving={isSaving}
+        />
+
+        {showCalendarModal && (
+          <div className="modal-overlay">
+            <div className="modal-content">
+              <div className="modal-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+              </div>
+              <h3>Calendar Sync</h3>
+              <p>FreshAlert can automatically add this expiry date to your Google Calendar so you never forget to use it!</p>
+              <div className="modal-actions">
+                <button 
+                   className="modal-btn-primary" 
+                   onClick={() => window.location.href = `/api/auth/google?userId=${user.id}`}
+                >
+                  Connect Calendar
+                </button>
+                <button className="modal-btn-secondary" onClick={declineCalendar}>
+                  Not Right Now
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (currentView === 'product_details') {
+    console.log("RENDERING ProductDetails with item:", selectedItem);
+    return (
+      <div className="app-container">
+        <ProductDetails 
+          item={selectedItem}
+          onBack={() => setCurrentView('dashboard')}
+          onSave={handleUpdateProduct}
+          onDelete={handleDeleteProduct}
+          leadTime={getLeadDays()}
+        />
+      </div>
+    );
+  }
+
+  if (currentView === 'splash') {
+    return (
+      <div className="splash-screen">
+        <div className="splash-bg"></div>
+        <h1 className="splash-text">FreshAlert</h1>
+      </div>
+    );
+  }
+
+  if (currentView === 'auth') {
+    return <Auth onAuthSuccess={({ token, user, isNewUser }) => {
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      setToken(token);
+      setUser(user);
+      if (isNewUser) {
+        setCurrentView('onboarding');
+      } else {
+        setCurrentView('dashboard');
+      }
+    }} />;
+  }
+
+  if (currentView === 'onboarding') {
+    return <Onboarding userId={user.id} onSkip={() => setCurrentView('dashboard')} />;
+  }
+
+  if (currentView === 'settings') {
+    return <Settings 
+      user={user} 
+      isCalendarAuthorized={isCalendarAuthorized} 
+      onBack={() => setCurrentView('dashboard')} 
+      onLogout={handleLogout}
+      leadTime={leadTime}
+      setLeadTime={setLeadTime}
+    />;
+  }
 
   // Calculate days until expiry
   const getDaysUntilExpiry = (dateString) => {
@@ -382,143 +486,154 @@ function App() {
 
   return (
     <div className="app-container">
-      {currentView === 'splash' && (
-        <div className="splash-screen">
-          <div className="splash-bg"></div>
-          <h1 className="splash-text">FreshAlert</h1>
+      <header className="header">
+        <div className="header-logo" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <img src="/lemon_chilli_icon.png" alt="FreshAlert" className="header-logo-image" />
+          <span style={{ color: '#FFD700', fontSize: '20px', fontWeight: 900 }}>FreshAlert</span>
         </div>
-      )}
-
-      {currentView === 'auth' && (
-        <Auth onAuthSuccess={({ token, user, isNewUser }) => {
-          localStorage.setItem('token', token);
-          localStorage.setItem('user', JSON.stringify(user));
-          setToken(token);
-          setUser(user);
-          if (isNewUser) setCurrentView('onboarding');
-          else setCurrentView('dashboard');
-        }} />
-      )}
-
-      {currentView === 'onboarding' && (
-        <Onboarding userId={user?.id} onSkip={() => setCurrentView('dashboard')} />
-      )}
-
-      {currentView === 'settings' && (
-        <Settings 
-          user={user} 
-          isCalendarAuthorized={isCalendarAuthorized} 
-          onBack={() => setCurrentView('dashboard')} 
-          onLogout={handleLogout}
-          leadTime={leadTime}
-          setLeadTime={setLeadTime}
-        />
-      )}
-
-      {currentView === 'scanner' && (
-        <Scanner 
-          onCapture={handleCapture}
-          onClose={() => setCurrentView('dashboard')}
-        />
-      )}
-
-      {currentView === 'confirm' && (
+        <div 
+          onClick={() => setCurrentView('settings')}
+          style={{ width: 40, height: 40, borderRadius: '50%', backgroundColor: 'var(--color-cream)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.05)', cursor: 'pointer', marginRight: '8px' }}
+          title="Settings"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-mint-dark)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </div>
+      </header>
+      
+      {currentView === 'dashboard' && (
         <>
-          <ConfirmDetails 
-            image={capturedImage}
-            extractedData={extractedData}
-            onConfirm={handleConfirmSave}
-            onCancel={() => setCurrentView('dashboard')}
-            isSaving={isSaving}
-          />
-          {showCalendarModal && (
-            <div className="modal-overlay">
-              <div className="modal-content">
-                <h3>Calendar Sync</h3>
-                <p>Add this to your Google Calendar?</p>
-                <div className="modal-actions">
-                  <button className="modal-btn-primary" onClick={() => window.location.href = `/api/auth/google?userId=${user.id}`}>Connect</button>
-                  <button className="modal-btn-secondary" onClick={declineCalendar}>No</button>
-                </div>
-              </div>
-            </div>
-          )}
-        </>
-      )}
-
-      {currentView === 'product_details' && (
-        <ProductDetails 
-          item={selectedItem}
-          onBack={() => setCurrentView('dashboard')}
-          onSave={handleUpdateProduct}
-          onDelete={handleDeleteProduct}
-          leadTime={getLeadDays()}
-        />
-      )}
-
-      {(currentView === 'dashboard' || currentView === 'settings') && (
-        <>
-          <header className="header">
-            <div className="header-logo" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <img src="/lemon_chilli_icon.png" alt="FreshAlert" className="header-logo-image" />
-              <span style={{ color: '#FFD700', fontSize: '20px', fontWeight: 900 }}>FreshAlert</span>
-            </div>
+          <div className="filter-header">
+            <h3>Inventory Status</h3>
+            {activeFilter !== 'ALL' && (
+              <button className="reset-filter-btn" onClick={() => setActiveFilter('ALL')}>
+                Show All
+              </button>
+            )}
+          </div>
+          
+          <div className="kpi-row">
             <div 
-              onClick={() => setCurrentView('settings')}
-              style={{ width: 40, height: 40, borderRadius: '50%', backgroundColor: 'var(--color-cream)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.05)', cursor: 'pointer', marginRight: '8px' }}
-              title="Settings"
+              className={`kpi-card card-expired ${activeFilter === 'EXPIRED' ? 'active-filter' : ''}`}
+              onClick={() => setActiveFilter('EXPIRED')}
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-mint-dark)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="3"></circle>
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-              </svg>
+              <strong>{expiredCount}</strong>
+              <span>Expired</span>
             </div>
-          </header>
-
-          {currentView === 'dashboard' && (
-            <>
-              <div className="filter-header">
-                <h3>Inventory Status</h3>
-              </div>
-              <div className="kpi-row">
-                <div className={`kpi-card card-expired ${activeFilter === 'EXPIRED' ? 'active-filter' : ''}`} onClick={() => setActiveFilter('EXPIRED')}><strong>{expiredCount}</strong><span>Expired</span></div>
-                <div className={`kpi-card card-expiring ${activeFilter === 'EXPIRING' ? 'active-filter' : ''}`} onClick={() => setActiveFilter('EXPIRING')}><strong>{expiringSoonCount}</strong><span>Expiring</span></div>
-                <div className={`kpi-card card-fresh ${activeFilter === 'FRESH' ? 'active-filter' : ''}`} onClick={() => setActiveFilter('FRESH')}><strong>{freshCount}</strong><span>Fresh</span></div>
-              </div>
-              <main className="inventory-list">
-                {!loading && inventory.length > 0 && (
-                  <div className="sort-controls">
-                    <label>Sort By:</label>
-                    <select value={sortOption} onChange={(e) => setSortOption(e.target.value)} className="sort-select">
-                      <option value="expiry">Expiry</option>
-                      <option value="recent">Recent</option>
-                    </select>
-                  </div>
-                )}
-                {loading ? (<div>Loading...</div>) : (
-                  sortedInventory.map((item) => {
-                    const daysLeft = getDaysUntilExpiry(item.expiry_date);
-                    const bClass = daysLeft < 0 ? 'status-expired' : (daysLeft <= getLeadDays() ? 'status-expiring' : 'status-fresh');
-                    const bText = daysLeft < 0 ? 'Expired' : (daysLeft <= getLeadDays() ? 'Expiring Soon' : 'Fresh');
-                    return (
-                      <div className="item-card" key={item.id} onClick={() => { setSelectedItem(item); setCurrentView('product_details'); }}>
-                        <div className="item-details">
-                          <h3>{item.product_name}</h3>
-                          <p>Expires: {formatDate(item.expiry_date)}</p>
-                        </div>
-                        <div className={`item-status ${bClass}`}>{bText}</div>
-                      </div>
-                    );
-                  })
-                )}
-              </main>
-              <div className="scan-button-container">
-                <button className="scan-button" onClick={() => setCurrentView('scanner')}>Add Product</button>
-              </div>
-            </>
-          )}
+            
+            <div 
+              className={`kpi-card card-expiring ${activeFilter === 'EXPIRING' ? 'active-filter' : ''}`}
+              onClick={() => setActiveFilter('EXPIRING')}
+            >
+              <strong>{expiringSoonCount}</strong>
+              <span>Expiring</span>
+            </div>
+            
+            <div 
+              className={`kpi-card card-fresh ${activeFilter === 'FRESH' ? 'active-filter' : ''}`}
+              onClick={() => setActiveFilter('FRESH')}
+            >
+              <strong>{freshCount}</strong>
+              <span>Fresh</span>
+            </div>
+          </div>
         </>
       )}
+
+      <main className="inventory-list">
+        {currentView === 'dashboard' && !loading && inventory.length > 0 && (
+          <div className="sort-controls">
+            <label htmlFor="sort-select">Sort By:</label>
+            <select 
+              id="sort-select" 
+              value={sortOption} 
+              onChange={(e) => setSortOption(e.target.value)}
+              className="sort-select"
+            >
+              <option value="expiry">Expiry (Closest First)</option>
+              <option value="recent">Recently Added</option>
+            </select>
+          </div>
+        )}
+
+        {loading ? (
+          <div style={{ textAlign: 'center', marginTop: '2rem', color: 'var(--color-text-muted)' }}>Loading ingredients...</div>
+        ) : (
+          sortedInventory.map((item) => {
+            const daysLeft = getDaysUntilExpiry(item.expiry_date);
+            let badgeClass = 'status-fresh';
+            let badgeText = 'Fresh';
+            
+            if (daysLeft < 0) {
+              badgeClass = 'status-expired';
+              badgeText = 'Expired';
+            } else if (daysLeft <= getLeadDays()) {
+              badgeClass = 'status-expiring';
+              badgeText = 'Expiring Soon';
+            }
+
+            return (
+              <div 
+                className="item-card" 
+                key={item.id}
+                onClick={() => {
+                  console.log("Card clicked for item:", item.product_name);
+                  setSelectedItem(item);
+                  setCurrentView('product_details');
+                }}
+              >
+                {item.product_image && !isEmoji(item.product_image) && item.product_image.length > 5 ? (
+                  <img src={item.product_image} alt={item.product_name} className="item-image" />
+                ) : (
+                  <div className="item-image-emoji">{item.product_image || '🥦'}</div>
+                )}
+                
+                <div className="item-details">
+                  <h3 className="item-name" style={{ fontWeight: 'bold', fontSize: '18px' }}>
+                    {item.product_name}
+                  </h3>
+                  <p className="item-expiry" style={{ color: '#1a1a1a', marginTop: '6px', fontSize: '14px', lineHeight: '1.2' }}>
+                    <strong>Expires on:</strong> {formatDate(item.expiry_date)}
+                  </p>
+                  <p className="item-added-on" style={{ fontSize: '12px', color: '#666666', marginTop: '4px' }}>
+                    <strong>Added on:</strong> {formatDate(item.added_on)}
+                  </p>
+                </div>
+                
+                <div className={`item-status ${badgeClass}`}>
+                  {badgeText}
+                </div>
+
+                <button 
+                  className="delete-card-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteProduct(item.id);
+                  }}
+                  title="Delete Product"
+                >
+                  <Trash2 size={18} />
+                </button>
+              </div>
+            );
+          })
+        )}
+      </main>
+
+      <div className="scan-button-container">
+        <button className="scan-button" onClick={() => setCurrentView('scanner')}>
+          <svg className="scan-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 7V5a2 2 0 0 1 2-2h2"></path>
+            <path d="M17 3h2a2 2 0 0 1 2 2v2"></path>
+            <path d="M21 17v2a2 2 0 0 1-2 2h-2"></path>
+            <path d="M7 21H5a2 2 0 0 1-2-2v-2"></path>
+            <line x1="7" y1="12" x2="17" y2="12"></line>
+          </svg>
+          Add Product
+        </button>
+      </div>
 
       {toastMessage && (
         <div className="toast">

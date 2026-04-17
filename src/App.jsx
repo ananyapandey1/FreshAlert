@@ -7,6 +7,7 @@ import ProductDetails from './ProductDetails';
 import Auth from './Auth';
 import Onboarding from './Onboarding';
 import Settings from './Settings';
+import Landing from './Landing';
 
 function App() {
   const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('user')) || null);
@@ -19,6 +20,7 @@ function App() {
   const [capturedImage, setCapturedImage] = useState(null);
   const [extractedData, setExtractedData] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const [leadTime, setLeadTime] = useState(() => localStorage.getItem('leadTime') || '7 Days');
 
   // Helper to get numeric lead time
@@ -33,9 +35,9 @@ function App() {
   const [pendingSaveData, setPendingSaveData] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
 
-  const fetchInventory = () => {
+  const fetchInventory = (showLoading = true) => {
     if (!token) return Promise.resolve();
-    setLoading(true);
+    if (showLoading) setLoading(true);
     return fetch(`/api/inventory`, {
       headers: { 'Authorization': `Bearer ${token}` }
     })
@@ -107,7 +109,7 @@ function App() {
 
   useEffect(() => {
     if (token) {
-      fetchInventory();
+      fetchInventory(inventory.length === 0);
     } else {
       setLoading(false);
     }
@@ -137,7 +139,7 @@ function App() {
       }
     } else if (currentView === 'splash') {
       const splashTimer = setTimeout(() => {
-        setCurrentView(token ? 'dashboard' : 'auth');
+        setCurrentView(token ? 'dashboard' : 'landing');
       }, 2000);
       return () => clearTimeout(splashTimer);
     }
@@ -182,6 +184,14 @@ function App() {
 
   const handleCapture = async (base64Image) => {
     setCapturedImage(base64Image);
+    
+    if (!base64Image) {
+      // Manual entry flow
+      setExtractedData({ name: '', expiry: '' });
+      setCurrentView('confirm');
+      return;
+    }
+
     setCurrentView('scanner'); // Keep showing scanner while processing
     
     try {
@@ -410,6 +420,15 @@ function App() {
     );
   }
 
+  if (currentView === 'landing') {
+    return (
+      <Landing 
+        onGetStarted={() => setCurrentView('auth')} 
+        onLogin={() => setCurrentView('auth')} 
+      />
+    );
+  }
+
   if (currentView === 'auth') {
     return <Auth onAuthSuccess={({ token, user, isNewUser }) => {
       localStorage.setItem('token', token);
@@ -459,7 +478,7 @@ function App() {
   }).length;
   const freshCount = inventory.filter(item => getDaysUntilExpiry(item.expiry_date) > getLeadDays()).length;
 
-  // Sorting Logic
+  // Sorting & Filtering Logic
   const sortedInventory = [...inventory]
     .filter(item => {
        const days = getDaysUntilExpiry(item.expiry_date);
@@ -468,6 +487,9 @@ function App() {
        if (activeFilter === 'FRESH') return days > getLeadDays();
        return true; // 'ALL'
     })
+    .filter(item => 
+      item.product_name?.toLowerCase().includes(searchTerm.toLowerCase())
+    )
     .sort((a, b) => {
     if (sortOption === 'expiry') {
       const getPriority = (item) => {
@@ -509,6 +531,32 @@ function App() {
         </div>
       </header>
       
+      {currentView === 'dashboard' && (
+        <div className="search-container">
+          <div className="search-wrapper">
+            <svg className="search-icon-input" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input 
+              type="text" 
+              placeholder="Search your ingredients..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="search-input"
+            />
+            {searchTerm && (
+              <button className="search-clear" onClick={() => setSearchTerm('')}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       {currentView === 'dashboard' && (
         <>
           <div className="filter-header">
@@ -638,6 +686,12 @@ function App() {
             <line x1="7" y1="12" x2="17" y2="12"></line>
           </svg>
           Add Product
+        </button>
+        <button className="manual-entry-btn-dash" onClick={() => handleCapture(null)} title="Add Manually">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+          </svg>
         </button>
       </div>
 

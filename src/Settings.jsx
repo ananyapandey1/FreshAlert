@@ -91,7 +91,10 @@ const Settings = ({ user, isCalendarAuthorized, onBack, onLogout }) => {
             <select 
               className="settings-select" 
               value={leadTime} 
-              onChange={(e) => handleLeadTimeChange(e.target.value)}
+              onChange={(e) => {
+                setLeadTime(e.target.value);
+                localStorage.setItem('leadTime', e.target.value);
+              }}
             >
                <option>1 Day</option>
               <option>3 Days</option>

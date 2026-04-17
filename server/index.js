@@ -129,8 +129,18 @@ app.get('/api/auth/google', (req, res) => {
 });
 
 app.get('/api/auth/callback', async (req, res) => {
-  const { code, state } = req.query;
-  console.log("OAuth Callback Hit, receiving code");
+  const { code, state, error, error_description } = req.query;
+  console.log("OAuth Callback Hit. code:", !!code, "state:", state, "error:", error);
+  
+  if (error) {
+    console.error("Google Auth Error:", error, error_description);
+    return res.status(400).send(`Authentication failed from Google: ${error_description || error}`);
+  }
+
+  if (!code) {
+    console.error("OAuth Callback missing authorization code.");
+    return res.status(400).send('Authentication failed: Missing authorization code from Google.');
+  }
   
   try {
     const { tokens } = await oauth2Client.getToken(code);
@@ -139,14 +149,23 @@ app.get('/api/auth/callback', async (req, res) => {
     if (userId) {
       console.log(`OAuth tokens received for User ${userId}. Updating user record...`);
       await db.query('UPDATE users SET google_tokens = $1 WHERE id = $2', [JSON.stringify(tokens), userId]);
-      console.log("OAuth Token Successfully Stored in DB for user:", userId);
+      console.log("OAuth Token Successfully Stored in DB for user:", userId, "Tokens keys:", Object.keys(tokens));
+    } else {
+      console.warn("OAuth Callback missing userId (state). Tokens NOT stored.");
     }
     
     const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+    
+    // Safety check: if we are on a vercel.app but redirecting to localhost, that's a misconfig
+    if (req.headers.host && req.headers.host.includes('vercel.app') && clientUrl.includes('localhost')) {
+      console.error("CONFIGURATION ERROR: Server is running on Vercel but CLIENT_URL is set to localhost. Redirect will fail.");
+    }
+
     res.redirect(`${clientUrl}?auth=success`);
-  } catch (error) {
-    console.error('Error retrieving access token', error);
-    res.status(500).send('Authentication failed');
+  } catch (err) {
+    console.error('Error retrieving access token:', err.message);
+    const errorMsg = err.response ? JSON.stringify(err.response.data) : err.message;
+    res.status(500).send(`Authentication failed during token exchange: ${errorMsg}`);
   }
 });
 
@@ -191,7 +210,7 @@ app.post('/api/inventory', authenticate, async (req, res) => {
     const userTokens = userRecord && userRecord.google_tokens ? JSON.parse(userRecord.google_tokens) : null;
 
     if (userTokens && expiry_date) {
-      console.log(`Calendar tokens found for user ${req.user.id}. Attempting sync.`);
+      console.log(`Calendar tokens found for user ${req.user.id}. Refresh token exists: ${!!userTokens.refresh_token}`);
       oauth2Client.setCredentials(userTokens);
       const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
       
@@ -225,12 +244,16 @@ app.post('/api/inventory', authenticate, async (req, res) => {
       };
 
       try {
+        console.log("Inserting expiryEvent:", JSON.stringify(expiryEvent, null, 2));
         const calRes = await calendar.events.insert({ calendarId: 'primary', resource: expiryEvent });
+        
+        console.log("Inserting warningEvent:", JSON.stringify(warningEvent, null, 2));
         await calendar.events.insert({ calendarId: 'primary', resource: warningEvent });
+        
         finalCalendarId = calRes.data.id;
-        console.log(`Successfully created BOTH events for ${product_name}`);
+        console.log(`Successfully created BOTH events for ${product_name}. Expiry Event ID: ${finalCalendarId}`);
       } catch (calError) {
-        console.error('Calendar Insert Error:', calError.message);
+        console.error('Calendar Insert Error. Full response:', calError.response ? JSON.stringify(calError.response.data, null, 2) : calError.message);
       }
     }
 
@@ -287,7 +310,7 @@ app.post('/api/analyze-image', async (req, res) => {
     if (!image) return res.status(400).json({ error: "Missing image" });
 
     // Initialize Gemini API
-    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    const ai = new GoogleGenAI(process.env.GEMINI_API_KEY);
     
     // Convert base64 Data URIs to clean Base64 strings for Gemini
     const base64Data = image.replace(/^data:image\/\w+;base64,/, "");

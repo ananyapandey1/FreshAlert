@@ -5,41 +5,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Privacy Policy - FreshAlert</title>
     <style>
-        body { font-family: sans-serif; line-height: 1.6; max-width: 800px; margin: 40px auto; padding: 20px; color: #333; }
-        h1 { color: #FFD700; }
-        h2 { border-bottom: 2px solid #FFD700; padding-bottom: 5px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 40px 20px; color: #333; background-color: #fffdf5; }
+        h1 { color: #4a5d52; font-size: 2.5rem; margin-bottom: 0.5rem; }
+        h2 { color: #4a5d52; border-bottom: 2px solid #FFD700; padding-bottom: 8px; margin-top: 2rem; }
+        .last-updated { color: #8b9991; font-style: italic; margin-bottom: 2rem; }
+        ul { padding-left: 20px; }
+        li { margin-bottom: 10px; }
+        .contact-box { background: #ffffff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-top: 2rem; border-left: 4px solid #FFD700; }
+        a { color: #E5C100; text-decoration: none; font-weight: bold; }
+        a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
     <h1>Privacy Policy</h1>
-    <p>Last updated: March 27, 2026</p>
+    <p class="last-updated">Last updated: April 14, 2026</p>
     
     <h2>1. Introduction</h2>
-    <p>Welcome to FreshAlert. We respect your privacy and are committed to protecting your personal data. This privacy policy will inform you as to how we look after your personal data when you use our web application.</p>
+    <p>Welcome to FreshAlert. We respect your privacy and are committed to protecting your personal data. This privacy policy informs you how we look after your personal data when you use our web application and tells you about your privacy rights.</p>
     
     <h2>2. Data We Collect</h2>
-    <p>We collect the following information:</p>
+    <p>We collect and process the following information:</p>
     <ul>
-        <li><strong>Account Information:</strong> Your email address and encrypted password.</li>
-        <li><strong>Inventory Data:</strong> Names and expiry dates of products you scan or enter.</li>
-        <li><strong>Google OAuth Data:</strong> If you connect your Google Calendar, we store an access token to create calendar events on your behalf. We do NOT read your other calendar events.</li>
+        <li><strong>Identity & Account Data:</strong> Your email address and a cryptographically hashed version of your password.</li>
+        <li><strong>Inventory Data:</strong> Information about the food products you track, including product names, photos (if uploaded), and expiry dates.</li>
+        <li><strong>Google User Data:</strong> If you choose to sync with Google Calendar, we receive authorization tokens via Google OAuth.</li>
     </ul>
     
-    <h2>3. How We Use Your Data</h2>
-    <p>We use your data to:</p>
+    <h2>3. Limited Use Disclosure (Google User Data)</h2>
+    <p>FreshAlert's use and transfer to any other app of information received from Google APIs will adhere to the <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank">Google API Service User Data Policy</a>, including the Limited Use requirements.</p>
+    <p>Specifically, for <strong>Google Calendar Synchronization</strong>:</p>
     <ul>
-        <li>Provide the core FreshAlert service (tracking expiry dates).</li>
-        <li>Sync expiry dates to your Google Calendar (if enabled).</li>
-        <li>Send notification alerts.</li>
+        <li>FreshAlert requests access to the <code>https://www.googleapis.com/auth/calendar.events</code> scope.</li>
+        <li>We only use this permission to <strong>create new calendar events</strong> corresponding to your food expiry dates and a 7-day prior warning.</li>
+        <li>We <strong>do not read</strong> your existing calendar events, <strong>do not delete</strong> other events, and <strong>do not share</strong> your calendar data with any third parties.</li>
+        <li>You can unlink your Google account at any time via the Settings menu.</li>
     </ul>
     
-    <h2>4. Data Storage</h2>
-    <p>Your data is stored securely in a PostgreSQL database hosted by Neon and Vercel.</p>
+    <h2>4. How We Use Your Data</h2>
+    <p>We use your data strictly to provide our food waste reduction service, maintain your inventory list, and send you automated alerts via Google Calendar.</p>
     
-    <h2>5. Your Rights</h2>
-    <p>You can request to delete your account and all associated data at any time via the Settings menu or by contacting us.</p>
+    <h2>5. Data Storage & Security</h2>
+    <p>Your data is stored securely in encrypted databases. We implement industry-standard security measures to prevent your personal data from being accidentally lost, used, or accessed in an unauthorized way.</p>
     
     <h2>6. Contact Us</h2>
-    <p>If you have any questions, please contact the FreshAlert team.</p>
+    <div class="contact-box">
+        <p>If you have any questions about this privacy policy or our privacy practices, please contact us at:</p>
+        <p><strong>Email:</strong> <a href="mailto:ananyapandey927@gmail.com">ananyapandey927@gmail.com</a></p>
+    </div>
 </body>
 </html>

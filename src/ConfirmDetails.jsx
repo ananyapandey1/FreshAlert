@@ -14,7 +14,14 @@ const ConfirmDetails = ({ image, extractedData, onConfirm, onCancel, isSaving })
 
       <div className="confirm-content">
         <div className="image-preview-container">
-           <img src={image} alt="Captured product" className="image-preview" />
+           {image ? (
+             <img src={image} alt="Captured product" className="image-preview" />
+           ) : (
+             <div className="image-preview-placeholder">
+               <span style={{ fontSize: '64px' }}>🥣</span>
+               <p style={{ color: 'white', marginTop: '12px', fontSize: '14px' }}>Manual Entry Mode</p>
+             </div>
+           )}
         </div>
         
         <div className="extracted-data-card">

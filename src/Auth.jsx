@@ -98,18 +98,14 @@ function Auth({ onAuthSuccess }) {
             {loading ? 'Processing...' : (isLogin ? 'Sign In' : 'Create Account')}
           </button>
 
-          {!isLogin && (
-            <button 
-              type="button" 
-              className="auth-secondary-btn"
-              onClick={() => window.location.href = `/api/auth/google`}
-            >
-              Sign up with Google
-            </button>
-          )}
+
         </form>
 
-        <div style={{ textAlign: 'center', marginTop: 24 }}>
+        <div style={{ textAlign: 'center', marginTop: 32, borderTop: '1px solid #f0ead2', paddingTop: 24 }}>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 20, marginBottom: 12 }}>
+            <a href="/privacy.html" target="_blank" rel="noopener noreferrer" style={{ color: '#8b9991', fontSize: 13, textDecoration: 'none', fontWeight: 600 }}>Privacy Policy</a>
+            <a href="/terms.html" target="_blank" rel="noopener noreferrer" style={{ color: '#8b9991', fontSize: 13, textDecoration: 'none', fontWeight: 600 }}>Terms of Service</a>
+          </div>
           <button 
             className="auth-toggle-link"
             onClick={() => {

@@ -12,7 +12,10 @@ import Landing from './Landing';
 function App() {
   const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('user')) || null);
   const [token, setToken] = useState(() => localStorage.getItem('token') || null);
-  const [currentView, setCurrentView] = useState('splash'); // 'splash' | 'auth' | 'onboarding' | 'dashboard' | 'scanner' | 'confirm' | 'product_details'
+  const [currentView, setCurrentView] = useState(() => {
+    const savedToken = localStorage.getItem('token');
+    return savedToken ? 'splash' : 'landing'; 
+  }); // 'splash' | 'auth' | 'onboarding' | 'dashboard' | 'scanner' | 'confirm' | 'product_details' | 'landing'
   const [inventory, setInventory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sortOption, setSortOption] = useState('expiry'); // 'expiry' | 'recent'
@@ -138,10 +141,10 @@ function App() {
       if (currentView === 'splash' || currentView === 'auth') {
         setCurrentView('dashboard'); 
       }
-    } else if (currentView === 'splash') {
+    } else if (currentView === 'splash' && token) {
       const splashTimer = setTimeout(() => {
-        setCurrentView(token ? 'dashboard' : 'landing');
-      }, 2000);
+        setCurrentView('dashboard');
+      }, 1500);
       return () => clearTimeout(splashTimer);
     }
 

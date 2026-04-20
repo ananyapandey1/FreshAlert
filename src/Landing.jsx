@@ -52,12 +52,22 @@ const Landing = ({ onGetStarted, onLogin }) => {
       </main>
 
       <footer className="landing-footer">
-        <div className="footer-links">
-          <a href="/privacy.html" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
-          <a href="/terms.html" target="_blank" rel="noopener noreferrer">Terms of Service</a>
+        <div className="footer-legal-container">
+          <h3>Legal & Transparency</h3>
+          <div className="footer-links">
+            <a href="/privacy.html" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+            <a href="/terms.html" target="_blank" rel="noopener noreferrer">Terms of Service</a>
+          </div>
+          <p className="footer-disclosure">
+            <strong>Google OAuth Disclosure:</strong> FreshAlert only requests the <code>https://www.googleapis.com/auth/calendar.events</code> scope 
+            permission strictly to <strong>create</strong> expiry reminders on your calendar. We never read, modify, or delete your existing 
+            calendar data, and your data is never shared with third parties.
+          </p>
         </div>
-        <p className="footer-contact">Support: ananyapandey927@gmail.com</p>
-        <p className="footer-copy">&copy; 2026 FreshAlert. All rights reserved.</p>
+        <div className="footer-contact-info">
+          <p className="footer-contact">Contact Support: ananyapandey927@gmail.com</p>
+          <p className="footer-copy">&copy; 2026 FreshAlert. All rights reserved.</p>
+        </div>
       </footer>
 
       <style jsx>{`
@@ -218,33 +228,62 @@ const Landing = ({ onGetStarted, onLogin }) => {
         }
 
         .landing-footer {
-          padding: 40px 20px;
+          padding: 60px 20px;
           text-align: center;
           border-top: 1px solid var(--color-cream-dark);
           background-color: var(--color-white);
         }
 
+        .footer-legal-container {
+          max-width: 600px;
+          margin: 0 auto 40px;
+          text-align: left;
+          padding: 24px;
+          background-color: var(--color-cream);
+          border-radius: 16px;
+          border: 1px solid var(--color-cream-dark);
+        }
+
+        .footer-legal-container h3 {
+          font-size: 16px;
+          font-weight: 800;
+          margin-bottom: 16px;
+          color: var(--color-text-main);
+          text-align: center;
+        }
+
         .footer-links {
           display: flex;
           justify-content: center;
-          gap: 20px;
-          margin-bottom: 16px;
+          gap: 32px;
+          margin-bottom: 24px;
         }
 
         .footer-links a {
           font-size: 14px;
           font-weight: 700;
-          color: var(--color-text-muted);
-          text-decoration: none;
+          color: var(--color-text-main);
+          text-decoration: underline;
+          text-underline-offset: 4px;
         }
 
         .footer-links a:hover {
-          color: var(--color-primary-yellow);
+          color: var(--color-primary-yellow-hover);
+        }
+
+        .footer-disclosure {
+          font-size: 13px;
+          line-height: 1.6;
+          color: var(--color-text-muted);
+          background: var(--color-white);
+          padding: 16px;
+          border-radius: 12px;
         }
 
         .footer-contact {
-          font-size: 12px;
-          color: var(--color-text-muted);
+          font-size: 14px;
+          font-weight: 600;
+          color: var(--color-text-main);
           margin-bottom: 8px;
         }
 

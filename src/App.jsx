@@ -7,15 +7,14 @@ import ProductDetails from './ProductDetails';
 import Auth from './Auth';
 import Onboarding from './Onboarding';
 import Settings from './Settings';
-import Landing from './Landing';
 
 function App() {
   const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('user')) || null);
   const [token, setToken] = useState(() => localStorage.getItem('token') || null);
   const [currentView, setCurrentView] = useState(() => {
     const savedToken = localStorage.getItem('token');
-    return savedToken ? 'splash' : 'landing'; 
-  }); // 'splash' | 'auth' | 'onboarding' | 'dashboard' | 'scanner' | 'confirm' | 'product_details' | 'landing'
+    return savedToken ? 'splash' : 'auth'; 
+  }); // 'splash' | 'auth' | 'onboarding' | 'dashboard' | 'scanner' | 'confirm' | 'product_details'
   const [inventory, setInventory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sortOption, setSortOption] = useState('expiry'); // 'expiry' | 'recent'
@@ -141,9 +140,9 @@ function App() {
       if (currentView === 'splash' || currentView === 'auth') {
         setCurrentView('dashboard'); 
       }
-    } else if (currentView === 'splash' && token) {
+    } else if (currentView === 'splash') {
       const splashTimer = setTimeout(() => {
-        setCurrentView('dashboard');
+        setCurrentView(token ? 'dashboard' : 'auth');
       }, 1500);
       return () => clearTimeout(splashTimer);
     }
@@ -425,13 +424,10 @@ function App() {
     );
   }
 
+  // Remove or bypass Landing view logic
   if (currentView === 'landing') {
-    return (
-      <Landing 
-        onGetStarted={() => setCurrentView('auth')} 
-        onLogin={() => setCurrentView('auth')} 
-      />
-    );
+    setCurrentView('auth');
+    return null;
   }
 
   if (currentView === 'auth') {

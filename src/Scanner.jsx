@@ -139,13 +139,6 @@ const Scanner = ({ onCapture, onClose }) => {
                     )}
                   </div>
                </button>
-               <button 
-                  className="manual-entry-btn-scanner" 
-                  onClick={() => onCapture(null)} 
-                  disabled={isProcessing}
-               >
-                  Manual Entry
-               </button>
              </div>
           </div>
         </div>

@@ -426,6 +426,58 @@
   height: 24px;
 }
 
+/* --- Add Options Menu --- */
+.add-options-menu {
+  position: absolute;
+  bottom: 90px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: calc(100% - 48px);
+  max-width: 300px;
+  z-index: 20;
+  animation: slideUp 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  pointer-events: auto;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.add-option-btn {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 16px 20px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text-main);
+  cursor: pointer;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
+}
+
+.add-option-btn:hover {
+  transform: translateX(8px);
+  background-color: var(--color-white);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.add-option-btn svg {
+  color: var(--color-primary-yellow);
+}
+
+.scan-button.active {
+  background-color: var(--color-mint-dark);
+  color: white;
+  box-shadow: 0 8px 24px rgba(74, 93, 82, 0.4);
+}
+
 .manual-entry-btn-dash {
   background-color: var(--color-white);
   color: var(--color-text-main);
@@ -756,6 +808,67 @@
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, #4a5d52, #2d3a33);
+  position: relative;
+}
+
+.gallery-upload-btn {
+  margin-top: 24px;
+  background-color: var(--color-primary-yellow);
+  color: #212121;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--shadow-yellow);
+  transition: all 0.2s;
+}
+
+.gallery-upload-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(249, 217, 73, 0.4);
+}
+
+.gallery-upload-btn-floating {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+  border: none;
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-text-main);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 5;
+}
+
+.processing-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  gap: 12px;
+  z-index: 10;
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
 }
 
 /* --- Confirm Details --- */

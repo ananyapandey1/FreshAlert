@@ -22,6 +22,7 @@ function App() {
   const [isSaving, setIsSaving] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [leadTime, setLeadTime] = useState(() => localStorage.getItem('leadTime') || '7 Days');
+  const [showAddOptions, setShowAddOptions] = useState(false);
 
   // Helper to get numeric lead time
   const getLeadDays = () => parseInt(leadTime.split(' ')[0]) || 7;
@@ -214,17 +215,18 @@ function App() {
   };
 
   const handleConfirmSave = async (finalData) => {
+    const finalImage = finalData.capturedImage || capturedImage;
     // If not authorized and haven't shown modal yet, intercept the save
     if (!isCalendarAuthorized) {
        setPendingSaveData(finalData);
        localStorage.setItem('pendingSaveData', JSON.stringify(finalData));
-       localStorage.setItem('capturedImage', capturedImage);
+       localStorage.setItem('capturedImage', finalImage);
        setShowCalendarModal(true);
        return;
     }
     
     // Otherwise, proceed to save directly
-    executeSave(finalData, capturedImage);
+    executeSave(finalData, finalImage);
   };
 
   const executeSave = async (dataToSave, imgToUse) => {
@@ -677,21 +679,55 @@ function App() {
       </main>
 
       <div className="scan-button-container">
-        <button className="scan-button" onClick={() => setCurrentView('scanner')}>
-          <svg className="scan-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 7V5a2 2 0 0 1 2-2h2"></path>
-            <path d="M17 3h2a2 2 0 0 1 2 2v2"></path>
-            <path d="M21 17v2a2 2 0 0 1-2 2h-2"></path>
-            <path d="M7 21H5a2 2 0 0 1-2-2v-2"></path>
-            <line x1="7" y1="12" x2="17" y2="12"></line>
-          </svg>
-          Add Product
-        </button>
-        <button className="manual-entry-btn-dash" onClick={() => handleCapture(null)} title="Add Manually">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-          </svg>
+        {showAddOptions && (
+          <div className="add-options-menu">
+            <button 
+              className="add-option-btn photo-option" 
+              onClick={() => {
+                setShowAddOptions(false);
+                setCurrentView('scanner');
+              }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                <circle cx="12" cy="13" r="4"></circle>
+              </svg>
+              <span>Take a Photo</span>
+            </button>
+            <button 
+              className="add-option-btn manual-option" 
+              onClick={() => {
+                setShowAddOptions(false);
+                handleCapture(null);
+              }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+              <span>Add Manually</span>
+            </button>
+          </div>
+        )}
+        <button 
+          className={`scan-button ${showAddOptions ? 'active' : ''}`} 
+          onClick={() => setShowAddOptions(!showAddOptions)}
+        >
+          {showAddOptions ? (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          ) : (
+            <svg className="scan-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 7V5a2 2 0 0 1 2-2h2"></path>
+              <path d="M17 3h2a2 2 0 0 1 2 2v2"></path>
+              <path d="M21 17v2a2 2 0 0 1-2 2h-2"></path>
+              <path d="M7 21H5a2 2 0 0 1-2-2v-2"></path>
+              <line x1="7" y1="12" x2="17" y2="12"></line>
+            </svg>
+          )}
+          {showAddOptions ? 'Cancel' : 'Add Product'}
         </button>
       </div>
 

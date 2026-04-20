@@ -22,12 +22,16 @@
 .search-container {
   padding: 16px 20px 8px 20px;
   width: 100%;
-  max-width: 600px;
+  max-width: 800px;
   margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .search-wrapper {
   position: relative;
+  flex: 1;
   display: flex;
   align-items: center;
 }
@@ -302,17 +306,25 @@
   color: var(--color-text-muted);
 }
 
-.sort-select {
+/* New top-bar sort select */
+.sort-select-top {
   background-color: var(--color-white);
-  border: 1px solid var(--color-cream-dark);
-  padding: 8px 12px;
-  border-radius: 10px;
+  border: 2px solid #f0ead2;
+  padding: 12px 16px;
+  border-radius: 16px;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--color-text-main);
   outline: none;
   cursor: pointer;
-  box-shadow: var(--shadow-soft);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  transition: all 0.2s;
+  min-width: 100px;
+}
+
+.sort-select-top:focus {
+  border-color: #D4AF37;
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.1);
 }
 
 .item-card {
@@ -320,13 +332,12 @@
   border-radius: 20px;
   padding: 20px;
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* Changed from center to prevent truncation of tall titles */
   gap: 16px;
   box-shadow: var(--shadow-soft);
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   cursor: pointer;
   position: relative;
-  overflow: hidden;
 }
 
 .item-card:hover {
@@ -372,9 +383,11 @@
   font-size: 16px;
   font-weight: 700;
   color: var(--color-text-main);
-  line-height: 1.4;
+  line-height: 1.2; /* Tighter line height to prevent clipping */
   white-space: normal;
   word-wrap: break-word;
+  margin: 0;
+  padding-top: 2px;
 }
 
 .item-expiry {

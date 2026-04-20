@@ -556,6 +556,17 @@ function App() {
               </button>
             )}
           </div>
+          {!loading && inventory.length > 0 && (
+            <select 
+              id="sort-select" 
+              value={sortOption} 
+              onChange={(e) => setSortOption(e.target.value)}
+              className="sort-select-top"
+            >
+              <option value="expiry">Expiry</option>
+              <option value="recent">Recent</option>
+            </select>
+          )}
         </div>
       )}
 
@@ -599,21 +610,6 @@ function App() {
       )}
 
       <main className="inventory-list">
-        {currentView === 'dashboard' && !loading && inventory.length > 0 && (
-          <div className="sort-controls">
-            <label htmlFor="sort-select">Sort By:</label>
-            <select 
-              id="sort-select" 
-              value={sortOption} 
-              onChange={(e) => setSortOption(e.target.value)}
-              className="sort-select"
-            >
-              <option value="expiry">Expiry (Closest First)</option>
-              <option value="recent">Recently Added</option>
-            </select>
-          </div>
-        )}
-
         {loading ? (
           <div style={{ textAlign: 'center', marginTop: '2rem', color: 'var(--color-text-muted)' }}>Loading ingredients...</div>
         ) : (

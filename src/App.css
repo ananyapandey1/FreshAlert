@@ -21,6 +21,9 @@
 /* --- Search Bar --- */
 .search-container {
   padding: 16px 20px 8px 20px;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 .search-wrapper {
@@ -137,10 +140,20 @@
   flex: 1;
   overflow-y: auto;
   padding: 16px 20px;
-  padding-bottom: 120px; /* space for scan button */
-  display: flex;
-  flex-direction: column;
+  padding-bottom: 140px; /* space for scan button */
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 16px;
+  align-content: start;
+}
+
+@media (min-width: 768px) {
+  .inventory-list {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    padding: 24px 40px;
+    gap: 24px;
+    padding-bottom: 160px;
+  }
 }
 
 .filter-header {
@@ -148,6 +161,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  max-width: 800px;
+  width: calc(100% - 40px);
+  align-self: center;
 }
 
 .filter-header h3 {
@@ -180,6 +196,16 @@
   display: flex;
   gap: 12px;
   align-items: stretch;
+  max-width: 800px;
+  width: calc(100% - 40px);
+  align-self: center;
+}
+
+@media (min-width: 768px) {
+  .kpi-row {
+    gap: 20px;
+    margin: 8px auto 24px auto;
+  }
 }
 
 .kpi-card {
@@ -389,9 +415,12 @@
   right: 0;
   padding: 24px;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
   background: linear-gradient(to top, var(--color-cream) 60%, rgba(255,253,245,0));
   pointer-events: none;
+  z-index: 50;
 }
 
 .scan-button {
@@ -426,14 +455,25 @@
   height: 24px;
 }
 
+/* On Desktop, make the floating button more subtle or fixed */
+@media (min-width: 1024px) {
+  .scan-button-container {
+    padding: 32px 60px;
+  }
+  
+  .add-options-menu {
+    max-width: 250px;
+  }
+}
+
 /* --- Add Options Menu --- */
 .add-options-menu {
-  position: absolute;
-  bottom: 90px;
+  position: relative;
+  bottom: 20px;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  width: calc(100% - 48px);
+  width: 100%;
   max-width: 300px;
   z-index: 20;
   animation: slideUp 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);

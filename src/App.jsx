@@ -7,14 +7,18 @@ import ProductDetails from './ProductDetails';
 import Auth from './Auth';
 import Onboarding from './Onboarding';
 import Settings from './Settings';
+import Landing from './Landing';
 
 function App() {
   const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('user')) || null);
   const [token, setToken] = useState(() => localStorage.getItem('token') || null);
   const [currentView, setCurrentView] = useState(() => {
+    const path = window.location.pathname.toLowerCase();
+    if (path === '/privacy' || path === '/privacy.html') return 'privacy';
+    if (path === '/terms' || path === '/terms.html') return 'terms';
     const savedToken = localStorage.getItem('token');
-    return savedToken ? 'splash' : 'auth'; 
-  }); // 'splash' | 'auth' | 'onboarding' | 'dashboard' | 'scanner' | 'confirm' | 'product_details'
+    return savedToken ? 'splash' : 'landing'; 
+  }); // 'splash' | 'landing' | 'auth' | 'onboarding' | 'dashboard' | 'scanner' | 'confirm' | 'product_details' | 'settings' | 'privacy' | 'terms'
   const [inventory, setInventory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sortOption, setSortOption] = useState('expiry'); // 'expiry' | 'recent'
@@ -103,7 +107,7 @@ function App() {
     localStorage.removeItem('user');
     setToken(null);
     setUser(null);
-    setCurrentView('auth');
+    setCurrentView('landing');
   };
 
   useEffect(() => {
@@ -424,10 +428,49 @@ function App() {
     );
   }
 
-  // Remove or bypass Landing view logic
+  if (currentView === 'privacy') {
+    return (
+      <div style={{ width: '100%', minHeight: '100vh', background: '#F9FBF9' }}>
+        <div style={{ padding: '1rem 2rem', background: '#ffffff', borderBottom: '1px solid #E8F5E9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <button 
+            onClick={() => setCurrentView(token ? 'dashboard' : 'landing')} 
+            style={{ background: 'none', border: '1px solid #2E7D32', color: '#2E7D32', fontWeight: 'bold', fontSize: '0.9rem', padding: '0.4rem 0.9rem', borderRadius: '6px', cursor: 'pointer' }}
+          >
+            ← Back
+          </button>
+          <span style={{ fontWeight: 900, color: '#1E3A2B', fontSize: '1.2rem' }}>FreshAlert Privacy Policy</span>
+        </div>
+        <iframe src="/privacy.html" style={{ width: '100%', height: 'calc(100vh - 65px)', border: 'none' }} title="Privacy Policy" />
+      </div>
+    );
+  }
+
+  if (currentView === 'terms') {
+    return (
+      <div style={{ width: '100%', minHeight: '100vh', background: '#F9FBF9' }}>
+        <div style={{ padding: '1rem 2rem', background: '#ffffff', borderBottom: '1px solid #E8F5E9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <button 
+            onClick={() => setCurrentView(token ? 'dashboard' : 'landing')} 
+            style={{ background: 'none', border: '1px solid #2E7D32', color: '#2E7D32', fontWeight: 'bold', fontSize: '0.9rem', padding: '0.4rem 0.9rem', borderRadius: '6px', cursor: 'pointer' }}
+          >
+            ← Back
+          </button>
+          <span style={{ fontWeight: 900, color: '#1E3A2B', fontSize: '1.2rem' }}>FreshAlert Terms of Service</span>
+        </div>
+        <iframe src="/terms.html" style={{ width: '100%', height: 'calc(100vh - 65px)', border: 'none' }} title="Terms of Service" />
+      </div>
+    );
+  }
+
   if (currentView === 'landing') {
-    setCurrentView('auth');
-    return null;
+    return (
+      <Landing 
+        onGetStarted={() => setCurrentView('auth')} 
+        onLogin={() => setCurrentView('auth')} 
+        onViewPrivacy={() => setCurrentView('privacy')}
+        onViewTerms={() => setCurrentView('terms')}
+      />
+    );
   }
 
   if (currentView === 'auth') {
@@ -456,6 +499,8 @@ function App() {
       onLogout={handleLogout}
       leadTime={leadTime}
       setLeadTime={setLeadTime}
+      onViewPrivacy={() => setCurrentView('privacy')}
+      onViewTerms={() => setCurrentView('terms')}
     />;
   }
 

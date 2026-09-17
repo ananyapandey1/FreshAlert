@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const Settings = ({ user, isCalendarAuthorized, onBack, onLogout }) => {
+const Settings = ({ user, isCalendarAuthorized, onBack, onLogout, onViewPrivacy, onViewTerms }) => {
   const [dailyAlert, setDailyAlert] = useState(true);
   const [leadTime, setLeadTime] = useState('3 Days');
 
@@ -146,6 +146,42 @@ const Settings = ({ user, isCalendarAuthorized, onBack, onLogout }) => {
           <div className="settings-actions">
             <button className="settings-btn-secondary" onClick={onLogout}>Logout</button>
             <button className="settings-btn-danger" onClick={handleDeleteAccount}>Delete Account</button>
+          </div>
+        </div>
+
+        <div className="settings-section">
+          <h3 className="settings-section-title">Privacy & Legal</h3>
+          
+          <div className="settings-row">
+            <div className="settings-label">
+              <strong>Privacy Policy</strong>
+              <span>View disclosures & Google Limited Use Policy</span>
+            </div>
+            <a 
+              href="/privacy.html" 
+              onClick={(e) => {
+                if (onViewPrivacy) { e.preventDefault(); onViewPrivacy(); }
+              }}
+              style={{ color: '#2E7D32', fontWeight: 600, textDecoration: 'underline', fontSize: '14px' }}
+            >
+              View Privacy Policy
+            </a>
+          </div>
+
+          <div className="settings-row">
+            <div className="settings-label">
+              <strong>Terms of Service</strong>
+              <span>View app terms & conditions</span>
+            </div>
+            <a 
+              href="/terms.html" 
+              onClick={(e) => {
+                if (onViewTerms) { e.preventDefault(); onViewTerms(); }
+              }}
+              style={{ color: '#2E7D32', fontWeight: 600, textDecoration: 'underline', fontSize: '14px' }}
+            >
+              View Terms of Service
+            </a>
           </div>
         </div>
 

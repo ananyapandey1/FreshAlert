@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 function Auth({ onAuthSuccess }) {
-  const [isLogin, setIsLogin] = useState(false);
+  const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);

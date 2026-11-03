@@ -214,11 +214,11 @@ app.post('/api/inventory', authenticate, async (req, res) => {
       oauth2Client.setCredentials(userTokens);
       const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
       
-      const [yyyy, mm, dd] = expiry_date.split('-');
-      const startDate = new Date(Date.UTC(yyyy, parseInt(mm) - 1, dd));
-      const endDate = new Date(Date.UTC(yyyy, parseInt(mm) - 1, parseInt(dd) + 1));
-      const warningStartDate = new Date(Date.UTC(yyyy, parseInt(mm) - 1, parseInt(dd) - 7));
-      const warningEndDate = new Date(Date.UTC(yyyy, parseInt(mm) - 1, parseInt(dd) - 6));
+      const [yyyy, mm, dd] = expiry_date.split('-').map(Number);
+      const startDate = new Date(Date.UTC(yyyy, mm - 1, dd));
+      const endDate = new Date(Date.UTC(yyyy, mm - 1, dd + 1));
+      const warningStartDate = new Date(Date.UTC(yyyy, mm - 1, dd - 7));
+      const warningEndDate = new Date(Date.UTC(yyyy, mm - 1, dd - 6));
       
       const expiryStartStr = startDate.toISOString().split('T')[0];
       const expiryEndStr = endDate.toISOString().split('T')[0];
@@ -295,9 +295,55 @@ app.put('/api/inventory/:id', authenticate, async (req, res) => {
 app.delete('/api/inventory/:id', authenticate, async (req, res) => {
   try {
     const { id } = req.params;
-    const resDb = await db.query('DELETE FROM inventory WHERE id = $1 AND user_id = $2', [id, req.user.id]);
-    if (resDb.rowCount === 0) return res.status(404).json({ error: "Item not found" });
-    
+    const userId = parseInt(req.user.id);
+
+    // Fetch the item first to get calendar_id and user tokens
+    const itemRes = await db.query('SELECT * FROM inventory WHERE id = $1 AND user_id = $2', [id, userId]);
+    if (itemRes.rowCount === 0) return res.status(404).json({ error: "Item not found" });
+
+    const item = itemRes.rows[0];
+
+    // Delete calendar events if they exist
+    if (item.calendar_id && item.calendar_id !== 'unlinked' && item.calendar_id !== 'cal-temp') {
+      try {
+        const userRes = await db.query('SELECT google_tokens FROM users WHERE id = $1', [userId]);
+        const userTokens = userRes.rows[0]?.google_tokens ? JSON.parse(userRes.rows[0].google_tokens) : null;
+        if (userTokens) {
+          oauth2Client.setCredentials(userTokens);
+          const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+
+          // Delete the main expiry event
+          await calendar.events.delete({ calendarId: 'primary', eventId: item.calendar_id }).catch(() => {});
+
+          // Find and delete the 7-day warning event (search by title)
+          const [yyyy, mm, dd] = (item.expiry_date instanceof Date
+            ? item.expiry_date.toISOString().split('T')[0]
+            : String(item.expiry_date).split('T')[0]
+          ).split('-').map(Number);
+          const warningDate = new Date(Date.UTC(yyyy, mm - 1, dd - 7));
+          const warningDateStr = warningDate.toISOString().split('T')[0];
+
+          const warningEvents = await calendar.events.list({
+            calendarId: 'primary',
+            q: `7-DAY WARNING: ${item.product_name}`,
+            timeMin: `${warningDateStr}T00:00:00Z`,
+            timeMax: `${warningDateStr}T23:59:59Z`,
+            singleEvents: true,
+          }).catch(() => ({ data: { items: [] } }));
+
+          for (const ev of (warningEvents.data.items || [])) {
+            await calendar.events.delete({ calendarId: 'primary', eventId: ev.id }).catch(() => {});
+          }
+
+          console.log(`Deleted calendar events for item ${id} (${item.product_name})`);
+        }
+      } catch (calErr) {
+        console.error('Calendar delete error (non-fatal):', calErr.message);
+      }
+    }
+
+    // Delete from DB
+    await db.query('DELETE FROM inventory WHERE id = $1 AND user_id = $2', [id, userId]);
     res.json({ message: "Deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });

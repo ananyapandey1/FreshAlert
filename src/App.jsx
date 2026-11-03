@@ -60,30 +60,26 @@ function App() {
           const toYYYYMMDD = (d) => {
             if (!d) return '';
             try {
-              // Handle ISO strings or strings with time suffixes
               if (typeof d === 'string') {
-                const datePart = d.split('T')[0];
-                const parts = datePart.split(/[\/\-]/);
-                if (parts.length === 3) {
-                  // Check if it's DD/MM/YYYY
-                  if (parts[0].length <= 2 && parts[2].length === 4) {
-                    return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
-                  }
-                  // Check if it's YYYY/MM/DD
-                  if (parts[0].length === 4) {
-                    return `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].substring(0, 2).padStart(2, '0')}`;
-                  }
+                // Date-only string (YYYY-MM-DD) — use as-is, no timezone shift
+                if (/^\d{4}-\d{2}-\d{2}$/.test(d)) return d;
+                // DD/MM/YYYY format
+                const slashParts = d.split('/');
+                if (slashParts.length === 3 && slashParts[0].length <= 2 && slashParts[2].length === 4) {
+                  return `${slashParts[2]}-${slashParts[1].padStart(2, '0')}-${slashParts[0].padStart(2, '0')}`;
                 }
               }
+              // For datetime strings (has T) or Date objects: parse and read LOCAL time
+              // This correctly handles pg returning IST midnight as "...T18:30:00.000Z"
               const date = new Date(d);
               if (isNaN(date.getTime())) return '';
               const year = date.getFullYear();
               const month = String(date.getMonth() + 1).padStart(2, '0');
               const day = String(date.getDate()).padStart(2, '0');
               return `${year}-${month}-${day}`;
-            } catch (err) { 
+            } catch (err) {
               console.error("Critical Date Error:", d, err);
-              return ''; 
+              return '';
             }
           };
           return {
@@ -241,7 +237,8 @@ function App() {
     // Calculate status
     let computedStatus = 'Fresh';
     if (dataToSave.expiry) {
-      const expiryDate = new Date(dataToSave.expiry);
+      const [ey, em, ed] = dataToSave.expiry.split('-').map(Number);
+      const expiryDate = new Date(ey, em - 1, ed);
       const today = new Date();
       expiryDate.setHours(0, 0, 0, 0);
       today.setHours(0, 0, 0, 0);
@@ -292,7 +289,8 @@ function App() {
   const handleUpdateProduct = async (updatedItem) => {
     let computedStatus = 'Fresh';
     if (updatedItem.expiry_date) {
-      const expiryDate = new Date(updatedItem.expiry_date);
+      const [ey, em, ed] = updatedItem.expiry_date.split('-').map(Number);
+      const expiryDate = new Date(ey, em - 1, ed);
       const today = new Date();
       expiryDate.setHours(0, 0, 0, 0);
       today.setHours(0, 0, 0, 0);
@@ -507,9 +505,15 @@ function App() {
   // Calculate days until expiry
   const getDaysUntilExpiry = (dateString) => {
     if (!dateString) return Infinity;
-    const expiry = new Date(dateString);
+    // Parse as local date to avoid UTC timezone shift (date-only strings are UTC by default in JS)
+    let expiry;
+    if (typeof dateString === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+      const [y, m, d] = dateString.split('-').map(Number);
+      expiry = new Date(y, m - 1, d);
+    } else {
+      expiry = new Date(dateString);
+    }
     const today = new Date();
-    // Reset times to compare just the dates
     expiry.setHours(0, 0, 0, 0);
     today.setHours(0, 0, 0, 0);
     const diffTime = expiry - today;

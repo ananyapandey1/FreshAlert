@@ -119,18 +119,34 @@ app.get('/api/auth/status', authenticate, async (req, res) => {
 
 app.get('/api/auth/google', (req, res) => {
   const { userId } = req.query;
+  const host = req.headers['x-forwarded-host'] || req.headers.host;
+  const isProd = host && (host.includes('vercel.app') || !host.includes('localhost'));
+  const redirectUri = isProd
+    ? `https://${host}/api/auth/callback`
+    : (process.env.OAUTH_REDIRECT_URI || `http://${host}/api/auth/callback`);
+
   const url = oauth2Client.generateAuthUrl({
     access_type: 'offline',
     prompt: 'consent',
     scope: ['https://www.googleapis.com/auth/calendar.events'],
-    state: userId
+    state: userId,
+    redirect_uri: redirectUri
   });
   res.redirect(url);
 });
 
 app.get('/api/auth/callback', async (req, res) => {
   const { code, state, error, error_description } = req.query;
-  console.log("OAuth Callback Hit. code:", !!code, "state:", state, "error:", error);
+  const host = req.headers['x-forwarded-host'] || req.headers.host;
+  const isProd = host && (host.includes('vercel.app') || !host.includes('localhost'));
+  const redirectUri = isProd
+    ? `https://${host}/api/auth/callback`
+    : (process.env.OAUTH_REDIRECT_URI || `http://${host}/api/auth/callback`);
+  const destination = isProd
+    ? `https://${host}`
+    : (process.env.CLIENT_URL || `http://${host}`);
+
+  console.log("OAuth Callback Hit. code:", !!code, "state:", state, "error:", error, "host:", host);
   
   if (error) {
     console.error("Google Auth Error:", error, error_description);
@@ -143,7 +159,10 @@ app.get('/api/auth/callback', async (req, res) => {
   }
   
   try {
-    const { tokens } = await oauth2Client.getToken(code);
+    const { tokens } = await oauth2Client.getToken({
+      code,
+      redirect_uri: redirectUri
+    });
     const userId = parseInt(state); 
     
     if (userId) {
@@ -153,17 +172,26 @@ app.get('/api/auth/callback', async (req, res) => {
     } else {
       console.warn("OAuth Callback missing userId (state). Tokens NOT stored.");
     }
-    
-    const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
-    
-    // Safety check: if we are on a vercel.app but redirecting to localhost, that's a misconfig
-    if (req.headers.host && req.headers.host.includes('vercel.app') && clientUrl.includes('localhost')) {
-      console.error("CONFIGURATION ERROR: Server is running on Vercel but CLIENT_URL is set to localhost. Redirect will fail.");
-    }
 
-    res.redirect(`${clientUrl}?auth=success`);
+    res.redirect(`${destination.replace(/\/$/, '')}?auth=success`);
   } catch (err) {
     console.error('Error retrieving access token:', err.message);
+    const userId = parseInt(state);
+
+    // Fallback: If code was already exchanged (e.g. browser reload / duplicate request),
+    // check if this user already has active tokens saved in the DB
+    if (userId) {
+      try {
+        const checkDb = await db.query('SELECT google_tokens FROM users WHERE id = $1', [userId]);
+        if (checkDb.rows[0]?.google_tokens) {
+          console.log(`User ${userId} already has valid tokens stored. Redirecting back to app.`);
+          return res.redirect(`${destination.replace(/\/$/, '')}?auth=success`);
+        }
+      } catch (dbErr) {
+        console.error('Failed to check existing tokens:', dbErr.message);
+      }
+    }
+
     const errorMsg = err.response ? JSON.stringify(err.response.data) : err.message;
     res.status(500).send(`Authentication failed during token exchange: ${errorMsg}`);
   }
@@ -408,3 +436,5 @@ app.post('/api/analyze-image', async (req, res) => {
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
+
+export default app;

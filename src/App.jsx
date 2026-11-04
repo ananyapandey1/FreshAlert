@@ -17,9 +17,10 @@ function App() {
     const path = window.location.pathname.toLowerCase();
     if (path === '/privacy' || path === '/privacy.html') return 'privacy';
     if (path === '/terms' || path === '/terms.html') return 'terms';
+    if (path === '/contact' || path === '/contact.html') return 'contact';
     const savedToken = localStorage.getItem('token');
     return savedToken ? 'splash' : 'landing'; 
-  }); // 'splash' | 'landing' | 'auth' | 'onboarding' | 'dashboard' | 'scanner' | 'confirm' | 'product_details' | 'settings' | 'privacy' | 'terms'
+  }); // 'splash' | 'landing' | 'auth' | 'onboarding' | 'dashboard' | 'scanner' | 'confirm' | 'product_details' | 'settings' | 'privacy' | 'terms' | 'contact'
   const [inventory, setInventory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sortOption, setSortOption] = useState('expiry'); // 'expiry' | 'recent'
@@ -457,6 +458,23 @@ function App() {
           <span style={{ fontWeight: 900, color: '#1E3A2B', fontSize: '1.2rem' }}>FreshAlert Terms of Service</span>
         </div>
         <iframe src="/terms.html" style={{ width: '100%', height: 'calc(100vh - 65px)', border: 'none' }} title="Terms of Service" />
+      </div>
+    );
+  }
+
+  if (currentView === 'contact') {
+    return (
+      <div style={{ width: '100%', minHeight: '100vh', background: '#F9FBF9' }}>
+        <div style={{ padding: '1rem 2rem', background: '#ffffff', borderBottom: '1px solid #E8F5E9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <button 
+            onClick={() => setCurrentView(token ? 'dashboard' : 'landing')} 
+            style={{ background: 'none', border: '1px solid #2E7D32', color: '#2E7D32', fontWeight: 'bold', fontSize: '0.9rem', padding: '0.4rem 0.9rem', borderRadius: '6px', cursor: 'pointer' }}
+          >
+            ← Back
+          </button>
+          <span style={{ fontWeight: 900, color: '#1E3A2B', fontSize: '1.2rem' }}>FreshAlert Contact Support</span>
+        </div>
+        <iframe src="/contact.html" style={{ width: '100%', height: 'calc(100vh - 65px)', border: 'none' }} title="Contact Support" />
       </div>
     );
   }

@@ -26,8 +26,7 @@ export default function Landing({ onGetStarted, onLogin, onViewPrivacy, onViewTe
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
           <a 
-            href="/privacy.html" 
-            onClick={handlePrivacyClick}
+            href="/privacy" 
             style={{ color: '#2E7D32', fontWeight: 600, fontSize: '0.95rem', textDecoration: 'none' }}
           >
             Privacy Policy
@@ -66,8 +65,7 @@ export default function Landing({ onGetStarted, onLogin, onViewPrivacy, onViewTe
             Start Tracking Free
           </button>
           <a 
-            href="/privacy.html" 
-            onClick={handlePrivacyClick}
+            href="/privacy" 
             style={{ padding: '0.9rem 1.8rem', borderRadius: '10px', border: '1px solid #2E7D32', background: '#ffffff', color: '#2E7D32', fontSize: '1.05rem', fontWeight: 600, textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
           >
             Privacy Policy & Data Uses
@@ -161,21 +159,19 @@ export default function Landing({ onGetStarted, onLogin, onViewPrivacy, onViewTe
         <p style={{ fontSize: '0.9rem', color: '#A5D6A7', marginBottom: '1.5rem' }}>Reducing food waste through smart AI technology and reminders.</p>
         <div style={{ display: 'flex', justifyContent: 'center', gap: '1.75rem', fontSize: '0.95rem', flexWrap: 'wrap' }}>
           <a 
-            href="/privacy.html" 
-            onClick={handlePrivacyClick}
+            href="/privacy" 
             style={{ color: '#E8F5E9', textDecoration: 'underline', fontWeight: 500 }}
           >
             Privacy Policy
           </a>
           <a 
-            href="/terms.html" 
-            onClick={handleTermsClick}
+            href="/terms" 
             style={{ color: '#E8F5E9', textDecoration: 'underline', fontWeight: 500 }}
           >
             Terms of Service
           </a>
           <a 
-            href="mailto:ananyapandey927@gmail.com" 
+            href="/contact" 
             style={{ color: '#E8F5E9', textDecoration: 'underline', fontWeight: 500 }}
           >
             Contact Support

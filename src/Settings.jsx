@@ -165,10 +165,7 @@ const Settings = ({ user, isCalendarAuthorized, onBack, onLogout, onViewPrivacy,
               <span>View disclosures & Google Limited Use Policy</span>
             </div>
             <a 
-              href="/privacy.html" 
-              onClick={(e) => {
-                if (onViewPrivacy) { e.preventDefault(); onViewPrivacy(); }
-              }}
+              href="/privacy" 
               style={{ color: '#2E7D32', fontWeight: 600, textDecoration: 'underline', fontSize: '14px' }}
             >
               View Privacy Policy
@@ -181,13 +178,23 @@ const Settings = ({ user, isCalendarAuthorized, onBack, onLogout, onViewPrivacy,
               <span>View app terms & conditions</span>
             </div>
             <a 
-              href="/terms.html" 
-              onClick={(e) => {
-                if (onViewTerms) { e.preventDefault(); onViewTerms(); }
-              }}
+              href="/terms" 
               style={{ color: '#2E7D32', fontWeight: 600, textDecoration: 'underline', fontSize: '14px' }}
             >
               View Terms of Service
+            </a>
+          </div>
+
+          <div className="settings-row">
+            <div className="settings-label">
+              <strong>Contact Support</strong>
+              <span>Get help or submit privacy/account requests</span>
+            </div>
+            <a 
+              href="/contact" 
+              style={{ color: '#2E7D32', fontWeight: 600, textDecoration: 'underline', fontSize: '14px' }}
+            >
+              Contact Support
             </a>
           </div>
         </div>

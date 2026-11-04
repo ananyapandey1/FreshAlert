@@ -1,8 +1,17 @@
 import React, { useState } from 'react';
+import { Bell, Clock, Calendar } from 'lucide-react';
+import CustomDropdown from './CustomDropdown';
 
 const Settings = ({ user, isCalendarAuthorized, onBack, onLogout, onViewPrivacy, onViewTerms }) => {
   const [dailyAlert, setDailyAlert] = useState(true);
   const [leadTime, setLeadTime] = useState('3 Days');
+
+  const leadTimeOptions = [
+    { value: '1 Day', label: '1 Day Before', shortLabel: '1 Day', subtitle: 'Urgent eve-of-expiry alert', icon: Bell },
+    { value: '3 Days', label: '3 Days Before', shortLabel: '3 Days', subtitle: 'Recommended for home kitchens', icon: Clock },
+    { value: '7 Days', label: '7 Days Before', shortLabel: '7 Days', subtitle: '1 full week advance notice', icon: Calendar },
+    { value: '15 Days', label: '15 Days Before', shortLabel: '15 Days', subtitle: 'Early alert for pantry staples', icon: Calendar }
+  ];
 
   const handleUnlink = async () => {
     if (!window.confirm("Unlink Google Calendar? New products will not sync to your calendar.")) return;
@@ -88,19 +97,17 @@ const Settings = ({ user, isCalendarAuthorized, onBack, onLogout, onViewPrivacy,
               <strong>Remind me [X] days before</strong>
               <span>When should items turn "Expiring Soon"?</span>
             </div>
-            <select 
-              className="settings-select" 
-              value={leadTime} 
-              onChange={(e) => {
-                setLeadTime(e.target.value);
-                localStorage.setItem('leadTime', e.target.value);
+            <CustomDropdown
+              value={leadTime}
+              onChange={(newVal) => {
+                setLeadTime(newVal);
+                localStorage.setItem('leadTime', newVal);
               }}
-            >
-               <option>1 Day</option>
-              <option>3 Days</option>
-              <option>7 Days</option>
-              <option>15 Days</option>
-            </select>
+              options={leadTimeOptions}
+              size="compact"
+              align="right"
+              ariaLabel="Reminder lead time"
+            />
           </div>
         </div>
 

@@ -306,11 +306,245 @@
   color: var(--color-text-muted);
 }
 
-/* New top-bar sort select */
-.sort-select-top {
+/* ============================================================
+   Senior Design System: Custom Dropdown Controls
+   ============================================================ */
+
+.custom-dropdown-container {
+  position: relative;
+  display: inline-block;
+  user-select: none;
+  font-family: inherit;
+}
+
+/* Medium size (Matches Search Bar height: 48px) */
+.custom-dropdown-container.medium {
+  height: 48px;
+  min-width: 140px;
+}
+
+/* Compact size (Used in Settings cards) */
+.custom-dropdown-container.compact {
+  height: 40px;
+  min-width: 150px;
+}
+
+/* Trigger Button */
+.custom-dropdown-trigger {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0 16px;
   background-color: var(--color-white);
   border: 2px solid #f0ead2;
-  padding: 12px 16px;
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-main);
+  cursor: pointer;
+  outline: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+.custom-dropdown-container.compact .custom-dropdown-trigger {
+  border-radius: 12px;
+  padding: 0 14px;
+  font-size: 13.5px;
+}
+
+.custom-dropdown-trigger:hover {
+  border-color: #d4af37;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(212, 175, 55, 0.12);
+  background-color: #ffffff;
+}
+
+.custom-dropdown-trigger.is-open {
+  border-color: #d4af37;
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15), 0 4px 14px rgba(212, 175, 55, 0.1);
+  background-color: #ffffff;
+}
+
+.custom-dropdown-trigger-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.custom-dropdown-icon {
+  display: flex;
+  align-items: center;
+  color: #8b9991;
+  transition: color 0.2s;
+}
+
+.custom-dropdown-trigger:hover .custom-dropdown-icon,
+.custom-dropdown-trigger.is-open .custom-dropdown-icon {
+  color: #b8860b;
+}
+
+.custom-dropdown-prefix {
+  color: #8b9991;
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.custom-dropdown-value {
+  color: var(--color-text-main);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.custom-dropdown-chevron {
+  color: #8b9991;
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), color 0.2s;
+  flex-shrink: 0;
+}
+
+.custom-dropdown-chevron.rotate {
+  transform: rotate(180deg);
+  color: #b8860b;
+}
+
+/* Floating Popover Menu */
+.custom-dropdown-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  z-index: 1000;
+  min-width: 260px;
+  background-color: #ffffff;
+  border: 1px solid #ede7d1;
+  border-radius: 18px;
+  padding: 8px;
+  box-shadow: 0 16px 36px rgba(44, 94, 59, 0.12), 0 4px 12px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  animation: dropdownPopoverEnter 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: top;
+}
+
+.custom-dropdown-popover.align-right {
+  right: 0;
+}
+
+.custom-dropdown-popover.align-left {
+  left: 0;
+}
+
+@keyframes dropdownPopoverEnter {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Popover Options */
+.custom-dropdown-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.custom-dropdown-item:hover,
+.custom-dropdown-item.highlighted {
+  background-color: #f7f9f6;
+}
+
+.custom-dropdown-item.selected {
+  background-color: #f0f7f2;
+}
+
+.custom-dropdown-item-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+}
+
+.custom-dropdown-item-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background-color: #f4f6f0;
+  color: #4a5d52;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.custom-dropdown-item.selected .custom-dropdown-item-icon {
+  background-color: #e2f2e6;
+  color: #2c5e3b;
+}
+
+.custom-dropdown-item-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.custom-dropdown-item-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--color-text-main);
+  line-height: 1.3;
+}
+
+.custom-dropdown-item.selected .custom-dropdown-item-title {
+  color: #2c5e3b;
+  font-weight: 700;
+}
+
+.custom-dropdown-item-desc {
+  font-size: 11.5px;
+  color: #8b9991;
+  line-height: 1.3;
+  margin-top: 2px;
+}
+
+.custom-dropdown-item-check {
+  color: #2c5e3b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
+
+/* Fallback / Native select styling modernization (if ever used) */
+.sort-select-top,
+.settings-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b9991' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 14px;
+  padding-right: 36px;
+  background-color: var(--color-white);
+  border: 2px solid #f0ead2;
+  padding: 12px 38px 12px 16px;
   border-radius: 16px;
   font-size: 14px;
   font-weight: 600;
@@ -319,12 +553,19 @@
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(0,0,0,0.02);
   transition: all 0.2s;
-  min-width: 100px;
+  min-width: 110px;
 }
 
-.sort-select-top:focus {
+.sort-select-top:hover,
+.settings-select:hover {
   border-color: #D4AF37;
-  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.1);
+  transform: translateY(-1px);
+}
+
+.sort-select-top:focus,
+.settings-select:focus {
+  border-color: #D4AF37;
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.15);
 }
 
 .item-card {

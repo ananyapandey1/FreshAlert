@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Trash2 } from 'lucide-react';
+import { Trash2, ArrowUpDown, Clock, Sparkles, ArrowDownAZ } from 'lucide-react';
 import './App.css';
 import Scanner from './Scanner';
 import ConfirmDetails from './ConfirmDetails';
@@ -8,6 +8,7 @@ import Auth from './Auth';
 import Onboarding from './Onboarding';
 import Settings from './Settings';
 import Landing from './Landing';
+import CustomDropdown from './CustomDropdown';
 
 function App() {
   const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('user')) || null);
@@ -555,12 +556,38 @@ function App() {
       if (priorityA !== priorityB) return priorityA - priorityB;
       
       return getDaysUntilExpiry(a.expiry_date) - getDaysUntilExpiry(b.expiry_date);
+    } else if (sortOption === 'alphabetical') {
+      return (a.product_name || '').localeCompare(b.product_name || '');
     } else {
       const dateA = new Date(a.added_on || 0);
       const dateB = new Date(b.added_on || 0);
       return dateB - dateA; // Descending (Newest first)
     }
   });
+
+  const sortOptions = [
+    {
+      value: 'expiry',
+      label: 'Expiring Soonest',
+      shortLabel: 'Expiry',
+      subtitle: 'Items expiring first',
+      icon: Clock
+    },
+    {
+      value: 'recent',
+      label: 'Recently Added',
+      shortLabel: 'Recent',
+      subtitle: 'Newest additions to pantry',
+      icon: Sparkles
+    },
+    {
+      value: 'alphabetical',
+      label: 'Name (A to Z)',
+      shortLabel: 'A to Z',
+      subtitle: 'Alphabetical order',
+      icon: ArrowDownAZ
+    }
+  ];
 
   return (
     <div className="app-container">
@@ -605,15 +632,16 @@ function App() {
             )}
           </div>
           {!loading && inventory.length > 0 && (
-            <select 
-              id="sort-select" 
+            <CustomDropdown 
               value={sortOption} 
-              onChange={(e) => setSortOption(e.target.value)}
-              className="sort-select-top"
-            >
-              <option value="expiry">Expiry</option>
-              <option value="recent">Recent</option>
-            </select>
+              onChange={setSortOption}
+              options={sortOptions}
+              prefix="Sort:"
+              icon={ArrowUpDown}
+              align="right"
+              size="medium"
+              ariaLabel="Sort inventory items"
+            />
           )}
         </div>
       )}

@@ -635,10 +635,11 @@ function App() {
             </svg>
             <input 
               type="text" 
-              placeholder="Search your ingredients..." 
+              placeholder="Search item" 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="search-input"
+              aria-label="Search item"
             />
             {searchTerm && (
               <button className="search-clear" onClick={() => setSearchTerm('')}>
